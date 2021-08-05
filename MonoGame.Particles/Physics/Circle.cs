@@ -36,5 +36,10 @@ namespace MonoGame.Particles.Physics
             return new AABB(new Vector2(-radius,-radius),new Vector2(radius,radius));
         }
 
+        public override Object Clone()
+        {
+            return new Circle(radius);
+        }
+
     }
 }

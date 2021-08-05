@@ -12,6 +12,7 @@ namespace MonoGame.Particles.Physics
         public int m_vertexCount;
         public Vector2[] m_vertices = new Vector2[MaxPolyVertexCount];
         public Vector2[] m_normals = new Vector2[MaxPolyVertexCount];
+        public Vector2 centroid;
 
         public override void Initialize(float density=1.0f)
         {
@@ -38,7 +39,7 @@ namespace MonoGame.Particles.Physics
             return new AABB(new Vector2(minx, miny), new Vector2(maxx, maxy));
         }
 
-        private void ComputeMass(float density)
+        public void ComputeMass(float density)
         {
             // Calculate centroid and moment of interia
             Vector2 c = Vector2.Zero; // centroid
@@ -67,7 +68,7 @@ namespace MonoGame.Particles.Physics
             }
 
             c *= 1.0f / area;
-
+            this.centroid = c;
             // Translate vertices to centroid (make the centroid (0, 0)
             // for the polygon in model space)
             // Not really necessary, but I like doing this anyway
@@ -87,11 +88,8 @@ namespace MonoGame.Particles.Physics
             u.M11 = c;
             u.M12 = -s;
             u.M21 = s;
-            u.M22 = c;          
+            u.M22 = c;       
         }
-
-
-
 
 
         // Half width and half height
@@ -216,5 +214,16 @@ namespace MonoGame.Particles.Physics
 
             return bestVertex;
         }
+
+        public override Object Clone()
+        {
+            PolygonShape s = new PolygonShape();
+            m_normals.CopyTo(s.m_normals, 0);
+            m_vertices.CopyTo(s.m_vertices, 0);
+            s.m_vertexCount = m_vertexCount;
+            return s;
+        }
     }
+
+    
 }

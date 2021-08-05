@@ -5,20 +5,22 @@ using System.Text;
 
 namespace MonoGame.Particles.Physics
 {
-    public class Scene
-    {
-        private float m_dt;
+    public class World
+    {        
         private readonly int m_iterations;
-        private List<Body> bodies=new List<Body>();
-        private List<Manifold> contacts = new List<Manifold>();
-
+        public List<Body> bodies=new List<Body>();
+        public List<Contact> contacts = new List<Contact>();        
         private SpatialHash hash;
 
-        public Scene(float dt, int iterations, int cellSize)
-        {
-            this.m_dt = dt;
+        public Vector2 WorldSize { get; }
+        public int CellSize { get; }
+
+        public World(int iterations, Vector2 worldSize, int cellSize)
+        {            
             this.m_iterations = iterations;
-            hash = new SpatialHash(1920, 1080, cellSize);
+            this.WorldSize = worldSize;
+            this.CellSize = cellSize;
+            hash = new SpatialHash((int)worldSize.X, (int)worldSize.Y, cellSize);            
         }
 
         private void IntegrateForces(Body b, float dt)
@@ -28,7 +30,12 @@ namespace MonoGame.Particles.Physics
                 return;
             }
 
-            b.velocity += (b.Force * b.im + VectorMath.gravity) * (dt / 2.0f);
+            if (b.Force.Length() < 1) b.Force = Vector2.Zero;
+
+            float dampening = VectorMath.Clamp(1.0f - dt * b.LinearDamping, 0.0f, 1.0f);
+
+            b.velocity += (b.Force * b.im + (b.IgnoreGravity?Vector2.Zero:VectorMath.gravity)) * (dt / 2.0f);
+            b.velocity *= dampening;
             b.angularVelocity += b.torque * b.iI * (dt / 2.0f);
         }
 
@@ -37,11 +44,11 @@ namespace MonoGame.Particles.Physics
             if (b.im == 0.0f)
             {
                 return;
-            }
+            }            
 
             b.position += b.velocity * dt;
-            b.orient += b.angularVelocity * dt;
-            b.SetOrientation(b.orient);
+            b.orientation += b.angularVelocity * dt;
+            b.SetOrientation(b.orientation);
             IntegrateForces(b, dt);
         }
 
@@ -70,23 +77,9 @@ namespace MonoGame.Particles.Physics
                 b.calculateAABB();
                 hash.updateBody(b);
             }
-
+            
             contacts.Clear();
-            /*for (int i = 0; i < bodies.Count; ++i)
-            {
-                Body A = bodies[i];
-
-                for (int j = i + 1; j < bodies.Count; ++j)
-                {
-                    Body B = bodies[j];
-                    if (A.im == 0 && B.im == 0)
-                        continue;
-                    Manifold m=new Manifold(A, B);
-                    m.Solve();
-                    if (m.contact_count>0)
-                        contacts.Add(m);
-                }
-            }*/
+            
             for (int i = 0; i < bodies.Count; ++i)
             {
                 Body A = bodies[i];
@@ -98,14 +91,22 @@ namespace MonoGame.Particles.Physics
                         continue;
                     }
 
-                    Manifold m = new Manifold(A, B);
+                    Contact m = new Contact(A, B);
                     m.Solve();
                     if (m.contact_count > 0)
-                    {
-                        contacts.Add(m);
+                    {                                                
+                        bool handle=A.DoCollision(B, m);
+
+                        if (handle) {
+                            contacts.Add(m);
+                        }
                     }
+                   
                 }
+                A.FinishCollisions();
             }
+
+           
 
             // Integrate forces
             for (int i = 0; i < bodies.Count; ++i)

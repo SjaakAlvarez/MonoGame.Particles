@@ -191,7 +191,7 @@ namespace MonoGame.Particles.Physics
             float dirX = x2 - x1;
             float dirY = y2 - y1;
             float distSqr = dirX * dirX + dirY * dirY;
-            if (distSqr < 0.00000001) // todo: use const epsilon
+            if (distSqr < VectorMath.EPSILON)
                 return arr;
 
             float nf = (float)(1 / Math.Sqrt(distSqr));

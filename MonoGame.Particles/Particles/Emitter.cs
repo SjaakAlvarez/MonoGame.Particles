@@ -1,4 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using MonoGame.Particles.Particles.Modifiers;
 using MonoGame.Particles.Physics;
 using System;
 using System.Collections.Generic;
@@ -8,73 +10,132 @@ namespace MonoGame.Particles.Particles
 {
     public class Emitter
     {
-        public List<Body> particles=new List<Body>();
+        public List<Particle> particles=new List<Particle>();
         public Vector2 position;
         private static Random rand = new Random();
-        private Scene scene;
-        private TimeSpan timeSpan;
-        private float particlesPerSecond;
-        private double releaseTime;
+        private World scene;
+        private Interval maxAge;
+        public float ParticlesPerSecond { get; set; }
+        public float LinearDamping { get; set; }
+        private double releaseTime=0;
         private Shape shape;
+        private Interval speed;
+        public bool started=false;
+        public List<Modifier> Modifiers { get; set; }
+        public Texture2D Texture { get; set; }
+        public bool IgnoreGravity { get; set; }
+        private bool canDestroy;
 
-        public Emitter(Scene scene, Shape shape, Vector2 position, float particlesPerSecond, TimeSpan timeSpan)
+        public delegate bool OnCollisionEventHandler(Body sender, Body other, Contact m);
+
+        internal OnCollisionEventHandler onCollisionEventHandler;
+        public event OnCollisionEventHandler OnCollision
+        {
+            add { onCollisionEventHandler += value; }
+            remove { onCollisionEventHandler -= value; }
+        }
+
+        public Emitter(World scene, Shape shape, Vector2 position, Interval speed, float particlesPerSecond, Interval maxAge)
         {
             this.position = position;
             this.scene = scene;
-            this.timeSpan = timeSpan;
-            this.particlesPerSecond = particlesPerSecond;
+            this.speed = speed;
+            this.maxAge = maxAge;
+            this.ParticlesPerSecond = particlesPerSecond;
             this.shape = shape;
+            Modifiers = new List<Modifier>();
         }
 
-        public void Trigger()
+        public void Start()
         {
-            
+            releaseTime = 0;
+            started = true;
+        }
+
+        public void Stop()
+        {
+            started = false;
+            canDestroy = true;
+        }
+
+        public bool CanDestroy()
+        {
+            return canDestroy && particles.Count == 0;
         }
 
         public void Update(double seconds)
         {
-            releaseTime += seconds;
+            if (started)
+            {
+                releaseTime += seconds;
 
-            double release = particlesPerSecond * releaseTime;
-            if (release > 1) {
-                int r =(int)Math.Floor(release);
-                releaseTime -= (r / particlesPerSecond);
-
-                for (int i = 0; i < r; i++)
+                double release = ParticlesPerSecond * releaseTime;
+                if (release > 1)
                 {
-                    //Circle circle2 = new Circle(2);
-                    Body body2=null;
-                    
-                    if(shape is Circle c)
+                    int r = (int)Math.Floor(release);
+                    releaseTime -= (r / ParticlesPerSecond);
+
+                    Interval rotation = new Interval(-Math.PI, Math.PI);
+                    Interval av = new Interval(-0.1f,0.1f);
+
+                    for (int i = 0; i < r; i++)
                     {
-                        Circle s = new Circle(shape.radius);
-                        body2 = new Body(s, position);
+                        Particle particle = new Particle((Shape)shape.Clone(), position);
+
+                        Matrix matrix = Matrix.CreateRotationZ((float)(rand.NextDouble() * Math.PI * 2));
+
+                        particle.velocity = new Vector2((float)speed.GetValue(), 0);
+                        particle.velocity = Vector2.Transform(particle.velocity, matrix);                        
+                        particle.SetOrientation((float)rotation.GetValue());
+                        particle.angularVelocity = (float)av.GetValue();
+                        particle.LinearDamping = LinearDamping;
+                        particle.MaxAge = maxAge.GetValue();
+                        particle.IgnoreGravity = IgnoreGravity;
+                        particle.OnCollision += Particle_OnCollision;
+                        scene.AddBody(particle);
+                        particles.Add(particle);
                     }
-                    else if(shape is PolygonShape p)
-                    {
-                        PolygonShape s = new PolygonShape();
-                        p.m_normals.CopyTo(s.m_normals,0);
-                        p.m_vertices.CopyTo(s.m_vertices,0);
-                        s.m_vertexCount=p.m_vertexCount;
-                        body2 = new Body(s, position);
-                    }
-                    
-                    body2.velocity = new Vector2((float)rand.NextDouble() * 8 - 4.0f, (float)rand.NextDouble() * 4);
-                    body2.IsParticle = true;
-                    body2.SetOrientation(0);
-                    scene.AddBody(body2);
-                    particles.Add(body2);
                 }
             }
 
-            foreach(Body p in particles)
+            foreach(Particle p in particles)
             {
-                p.Age += (float)seconds;
+                p.Age += seconds*1000;
+                foreach(Modifier m in Modifiers)
+                {
+                    m.Execute(p);
+                }
             }
             
-            List<Body> remove = particles.FindAll(p => p.Age > timeSpan.TotalSeconds);
-            particles.RemoveAll(p => p.Age > timeSpan.TotalSeconds);
-            foreach (Body b in remove) scene.RemoveBody(b);
+            List<Particle> remove = particles.FindAll(p => p.Age > p.MaxAge);
+            particles.RemoveAll(p => p.Age > p.MaxAge);
+            foreach (Particle b in remove) scene.RemoveBody(b);
+        }
+
+        private bool Particle_OnCollision(Body sender, Body other, Contact m)
+        {
+            
+            bool keep = true;
+            if (onCollisionEventHandler != null)
+            {
+                keep = onCollisionEventHandler(sender, other, m);
+            }
+            if (!keep)
+            {
+                ((Particle)sender).Age = ((Particle)sender).MaxAge;
+            }
+            //Let the other object determine if it wants to collide
+            return false;
+        }
+
+        public void Draw(SpriteBatch spriteBatch)
+        {
+
+            foreach (Particle p in particles)
+            {
+                //new Rectangle(new Point((int)b.position.X, (int)b.position.Y), new Point(40, 40)), new Rectangle(0, 0, 64, 64), b.Color* b.Alpha, b.orientation, new Vector2(32, 32), SpriteEffects.None, 0);
+                spriteBatch.Draw(Texture,new Vector2(p.position.X, p.position.Y), new Rectangle(0,0,Texture.Width,Texture.Height), p.Color * p.Alpha, p.orientation, new Vector2(Texture.Width,Texture.Height)/2,1.0f, SpriteEffects.None, 0); 
+            }
         }
     }
 }

@@ -5,7 +5,7 @@ using System.Text;
 
 namespace MonoGame.Particles.Physics
 {
-    public class Manifold
+    public class Contact
     {        
         private readonly Body A;
         private readonly Body B;
@@ -21,7 +21,7 @@ namespace MonoGame.Particles.Physics
         //TODO fix this
         const float dt = 1.0f / 60.0f;        
 
-        public Manifold(Body a, Body b)
+        public Contact(Body a, Body b)
         {
             A = a;
             B = b;

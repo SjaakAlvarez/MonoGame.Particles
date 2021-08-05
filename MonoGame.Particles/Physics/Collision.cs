@@ -8,7 +8,6 @@ namespace MonoGame.Particles.Physics
     public static class Collision
     {
         
-
         public static bool BiasGreaterThan(float a, float b)
         {
             const float k_biasRelative = 0.95f;
@@ -16,10 +15,7 @@ namespace MonoGame.Particles.Physics
             return a >= b * k_biasRelative + a * k_biasAbsolute;
         }
 
-        
-
-
-        public static void CircleToCircle(Manifold m, Body a, Body b)
+        public static void CircleToCircle(Contact m, Body a, Body b)
         {
             Circle A = (Circle)a.shape;
             Circle B = (Circle)b.shape;
@@ -55,10 +51,10 @@ namespace MonoGame.Particles.Physics
             }
         }
 
-        public static void CircletoPolygon(Manifold m, Body a, Body b)
+        public static void CircletoPolygon(Contact m, Body a, Body b)
         {
             Circle A = (Circle)a.shape;
-            PolygonShape B = (PolygonShape)b.shape;
+            PolygonShape B = (PolygonShape)b.shape;           
 
             m.contact_count = 0;
 
@@ -141,14 +137,14 @@ namespace MonoGame.Particles.Physics
                 if (VectorMath.Dot(center - v1, n) > A.radius)
                     return;
 
-                n = VectorMath.Mult( B.u ,n);
+                n = VectorMath.Mult(B.u ,n);
                 m.normal = -n;
                 m.contacts[0] = m.normal * A.radius + a.position;
                 m.contact_count = 1;
             }
         }
 
-        public static void PolygontoCircle(Manifold m, Body a, Body b)
+        public static void PolygontoCircle(Contact m, Body a, Body b)
         {
             CircletoPolygon(m, b, a);
             m.normal = -m.normal;
@@ -251,7 +247,7 @@ namespace MonoGame.Particles.Physics
             return sp;
         }
 
-        public static void PolygontoPolygon(Manifold m, Body a, Body b)
+        public static void PolygontoPolygon(Contact m, Body a, Body b)
         {
             PolygonShape A = (PolygonShape)a.shape;
             PolygonShape B = (PolygonShape)b.shape;
@@ -294,20 +290,7 @@ namespace MonoGame.Particles.Physics
 
             // World space incident face
             Vector2[] incidentFace=new Vector2[2];
-            FindIncidentFace(incidentFace, RefPoly, IncPoly, referenceIndex);
-
-            //        y
-            //        ^  ->n       ^
-            //      +---c ------posPlane--
-            //  x < | i |\
-            //      +---+ c-----negPlane--
-            //             \       v
-            //              r
-            //
-            //  r : reference face
-            //  i : incident poly
-            //  c : clipped point
-            //  n : incident normal
+            FindIncidentFace(incidentFace, RefPoly, IncPoly, referenceIndex);          
 
             // Setup reference face vertices
             Vector2 v1 = RefPoly.m_vertices[referenceIndex];

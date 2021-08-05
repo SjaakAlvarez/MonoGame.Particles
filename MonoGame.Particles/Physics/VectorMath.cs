@@ -12,6 +12,11 @@ namespace MonoGame.Particles.Physics
         public const float gravityScale = 0.01f;
         public static Vector2 gravity = new Vector2(0, 10.0f * gravityScale);
 
+        public static float Clamp(float a, float low, float high)
+        {
+            return Math.Max(low, Math.Min(a, high));
+        }
+
         public static float Cross(Vector2 value1, Vector2 value2)
         {
             return value1.X * value2.Y
