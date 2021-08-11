@@ -1,16 +1,32 @@
 ﻿using Microsoft.Xna.Framework;
+using MonoGame.Extended.Collections;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace MonoGame.Particles.Physics
 {
     public class SpatialHash
     {
         /* the square cell gridLength of the grid. Must be larger than the largest shape in the space. */
-        private float gridHeightRes;
-        private float gridWidthRes;
-        private decimal invCellSize;
+        private readonly float gridHeightRes;
+        private readonly float gridWidthRes;
+        private readonly decimal invCellSize;
+
+        //private readonly List<Body> collidingBodies = new List<Body>();
+        public int cellSize { get; set; }
+
+        /* the world space width */
+        public int gridWidth { get; set; }
+
+        /* the world space height */
+        public int gridHeight { get; set; }
+
+        /* the number of buckets (i.e. cells) in the spatial grid */
+        public int gridLength { get; set; }
+        /* the array-list holding the spatial grid buckets */
+        public List<List<Body>> grid { get; set; }        
 
         public SpatialHash(int _width, int _height, int _cellSize)
         {
@@ -26,15 +42,18 @@ namespace MonoGame.Particles.Physics
             gridLength = gridWidth * gridHeight;
 
             grid = new List<List<Body>>(gridLength);
+           
 
             for (int i = 0; i < gridLength; i++)
-                grid.Add(new List<Body>());
+            {
+                grid.Add(new List<Body>());                
+            }
 
         }
 
         public void addBody(Body b)
         {
-            addIndex(b, getIndex1DVec(clampToGridVec(b.position.Y, b.position.Y)));
+            addIndex(b, getIndex1DVec(clampToGridVec(b.Position.Y, b.Position.Y)));
         }
 
         public void removeBody(Body b)
@@ -44,35 +63,33 @@ namespace MonoGame.Particles.Physics
 
         public void updateBody(Body b)
         {
-            updateIndexes(b, aabbToGrid(b.aabb.min, b.aabb.max));
+            updateIndexes(b, aabbToGrid(b.AABB.min, b.AABB.max));
         }
-
+                
         public List<Body> getAllBodiesSharingCellsWithBody(Body body)
         {
-            var collidingBodies = new List<Body>();
-            foreach (int i in body.gridIndex)
-            {
-                if (grid[i].Count == 0)
-                    continue;
+            //collidingBodies.Clear();
+            List<Body> collidingBodies = new List<Body>();
 
-                foreach (var cbd in grid[i].ToArray())
+            foreach (int i in body.GridIndex)
+            {                                
+                foreach(Body b in grid[i])
                 {
-                    if (cbd == body)
-                        continue;
-                    collidingBodies.Add(cbd);
+                    if (!b.IsParticle && b != body) collidingBodies.Add(b);
                 }
+                //collidingBodies.AddRange(grid[i].FindAll(p => !p.IsParticle && p != body));
             }
             return collidingBodies;
         }
 
         public bool isBodySharingAnyCell(Body body)
         {
-            foreach (int i in body.gridIndex)
+            foreach (int i in body.GridIndex)
             {
                 if (grid[i].Count == 0)
                     continue;
 
-                foreach (var cbd in grid[i].ToArray())
+                foreach (var cbd in grid[i])
                 {
                     if (cbd == body)
                         continue;
@@ -99,11 +116,11 @@ namespace MonoGame.Particles.Physics
 
         private void updateIndexes(Body b, List<int> _ar)
         {
-            foreach (int i in b.gridIndex)
+            foreach (int i in b.GridIndex)
             {
                 removeIndex(b, i);
             }            
-            b.gridIndex.Clear();
+            b.GridIndex.Clear();
 
             foreach (int i in _ar)
             {
@@ -112,17 +129,17 @@ namespace MonoGame.Particles.Physics
         }
 
         private void addIndex(Body b, int _cellPos)
-        {
-            grid[_cellPos].Add(b);
-            b.gridIndex.Add(_cellPos);
+        {            
+            grid[_cellPos].Add(b);            
+            b.GridIndex.Add(_cellPos);
         }
         private void removeIndexes(Body b) 
         {
-            foreach (int i in b.gridIndex)
+            foreach (int i in b.GridIndex)
             {
                 removeIndex(b, i);
             }            
-            b.gridIndex.Clear();
+            b.GridIndex.Clear();
         }
         private void removeIndex(Body b, int _pos) 
         {
@@ -131,10 +148,7 @@ namespace MonoGame.Particles.Physics
 
         private bool isValidGridPos(int num)
         {
-            if (num < 0 || num >= gridLength)
-                return false;
-            else
-                return true;
+            return num < 0 || num >= gridLength;               
         }
 
         public Vector2 clampToGridVec(float x, float y)
@@ -191,7 +205,7 @@ namespace MonoGame.Particles.Physics
             float dirX = x2 - x1;
             float dirY = y2 - y1;
             float distSqr = dirX * dirX + dirY * dirY;
-            if (distSqr < 0.00000001) // todo: use const epsilon
+            if (distSqr < VectorMath.EPSILON)
                 return arr;
 
             float nf = (float)(1 / Math.Sqrt(distSqr));
@@ -238,34 +252,8 @@ namespace MonoGame.Particles.Physics
                 arr.Add(getIndex1D(gridPosX, gridPosY));
             }
             return arr;
-        }
+        }       
 
-        public void clear()
-        {
-            foreach (var cell in grid)
-            {
-                if (cell.Count > 0)
-                {
-                    foreach (var co in cell)
-                    {
-                        co.gridIndex.Clear();
-                    }
-                    cell.Clear();
-                }
-            }
-        }
-
-        public int cellSize { get; set; }
-
-        /* the world space width */
-        public int gridWidth { get; set; }
-
-        /* the world space height */
-        public int gridHeight { get; set; }
-
-        /* the number of buckets (i.e. cells) in the spatial grid */
-        public int gridLength { get; set; }
-        /* the array-list holding the spatial grid buckets */
-        public List<List<Body>> grid { get; set; }
+        
     }
 }

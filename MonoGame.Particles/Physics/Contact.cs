@@ -2,10 +2,11 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace MonoGame.Particles.Physics
 {
-    public class Manifold
+    public class Contact
     {        
         private readonly Body A;
         private readonly Body B;
@@ -21,7 +22,7 @@ namespace MonoGame.Particles.Physics
         //TODO fix this
         const float dt = 1.0f / 60.0f;        
 
-        public Manifold(Body a, Body b)
+        public Contact(Body a, Body b)
         {
             A = a;
             B = b;
@@ -31,19 +32,19 @@ namespace MonoGame.Particles.Physics
         {
             if (!A.IsParticle || !B.IsParticle)
             {                
-                if (A.shape is Circle && B.shape is Circle)
+                if (A.Shape is Circle && B.Shape is Circle)
                 {
                     Collision.CircleToCircle(this, A, B);
                 }
-                else if (A.shape is PolygonShape && B.shape is Circle)
+                else if (A.Shape is PolygonShape && B.Shape is Circle)
                 {
                     Collision.PolygontoCircle(this, A, B);
                 }
-                else if (A.shape is Circle && B.shape is PolygonShape)
+                else if (A.Shape is Circle && B.Shape is PolygonShape)
                 {
                     Collision.CircletoPolygon(this, A, B);
                 }
-                else if (A.shape is PolygonShape && B.shape is PolygonShape)
+                else if (A.Shape is PolygonShape && B.Shape is PolygonShape)
                 {
                     Collision.PolygontoPolygon(this, A, B);
                 }                
@@ -59,21 +60,20 @@ namespace MonoGame.Particles.Physics
         public void Initialize()
         {
             // Calculate average restitution
-            e = Math.Min(A.restitution, B.restitution);
+            e = Math.Min(A.Restitution, B.Restitution);
 
             // Calculate static and dynamic friction
-            sf = (float)Math.Sqrt(A.staticFriction * B.staticFriction);
-            df = (float)Math.Sqrt(A.dynamicFriction * B.dynamicFriction);
+            sf = (float)Math.Sqrt(A.StaticFriction * B.StaticFriction);
+            df = (float)Math.Sqrt(A.DynamicFriction * B.DynamicFriction);
 
             for (int i = 0; i < contact_count; ++i)
             {
                 // Calculate radii from COM to contact
-                Vector2 ra = contacts[i] - A.position;
-                Vector2 rb = contacts[i] - B.position;
+                Vector2 ra = contacts[i] - A.Position;
+                Vector2 rb = contacts[i] - B.Position;
 
-                Vector2 rv = B.velocity + VectorMath.Cross(B.angularVelocity, rb) -
-                          A.velocity - VectorMath.Cross(A.angularVelocity, ra);
-
+                Vector2 rv = B.Velocity + VectorMath.Cross(B.AngularVelocity, rb) -
+                          A.Velocity - VectorMath.Cross(A.AngularVelocity, ra);
 
                 // Determine if we should perform a resting collision or not
                 // The idea is if the only thing moving this object is gravity,
@@ -92,15 +92,15 @@ namespace MonoGame.Particles.Physics
                 return;
             }
 
-            for (int i = 0; i < contact_count; ++i)
+            for(int i = 0; i < contact_count; ++i)
             {
                 // Calculate radii from COM to contact
-                Vector2 ra = contacts[i] - A.position;
-                Vector2 rb = contacts[i] - B.position;
+                Vector2 ra = contacts[i] - A.Position;
+                Vector2 rb = contacts[i] - B.Position;
 
                 // Relative velocity
-                Vector2 rv = B.velocity + VectorMath.Cross(B.angularVelocity, rb) -
-                          A.velocity - VectorMath.Cross(A.angularVelocity, ra);
+                Vector2 rv = B.Velocity + VectorMath.Cross(B.AngularVelocity, rb) -
+                          A.Velocity - VectorMath.Cross(A.AngularVelocity, ra);
 
                 // Relative velocity along the normal
                 float contactVel = VectorMath.Dot(rv, normal);
@@ -111,26 +111,25 @@ namespace MonoGame.Particles.Physics
 
                 float raCrossN = VectorMath.Cross(ra, normal);
                 float rbCrossN = VectorMath.Cross(rb, normal);
-                float invMassSum = A.im + B.im + (float)Math.Pow(raCrossN,2) * A.iI + (float)Math.Pow(rbCrossN,2) * B.iI;
+                float invMassSum = A.im + B.im + (float)Math.Pow(raCrossN, 2) * A.iI + (float)Math.Pow(rbCrossN, 2) * B.iI;
 
                 // Calculate impulse scalar
                 float j = -(1.0f + e) * contactVel;
                 j /= invMassSum;
                 j /= (float)contact_count;
 
+            
                 // Apply impulse
                 Vector2 impulse = normal * j;
                 A.ApplyImpulse(-impulse, ra);
                 B.ApplyImpulse(impulse, rb);
 
                 // Friction impulse
-                rv = B.velocity + VectorMath.Cross(B.angularVelocity, rb) -
-                     A.velocity - VectorMath.Cross(A.angularVelocity, ra);
+                rv = B.Velocity + VectorMath.Cross(B.AngularVelocity, rb) -
+                     A.Velocity - VectorMath.Cross(A.AngularVelocity, ra);
 
                 Vector2 t = rv - (normal * VectorMath.Dot(rv, normal));
-                t=VectorMath.Normalize(t);
-
-                
+                t = VectorMath.Normalize(t);
 
                 // j tangent magnitude
                 float jt = -VectorMath.Dot(rv, t);
@@ -159,14 +158,14 @@ namespace MonoGame.Particles.Physics
             const float k_slop = 0.05f; // Penetration allowance
             const float percent = 0.4f; // Penetration percentage to correct
             Vector2 correction = (Math.Max(penetration - k_slop, 0.0f) / (A.im + B.im)) * normal * percent;            
-            A.position -= correction * A.im;
-            B.position += correction * B.im;            
+            if(!A.FixedPosition) A.Position -= correction * A.im;
+            if(!B.FixedPosition) B.Position += correction * B.im;            
         }        
 
         public void InfiniteMassCorrection()
         {
-            A.velocity=Vector2.Zero;
-            B.velocity=Vector2.Zero;
+            A.Velocity=Vector2.Zero;
+            B.Velocity=Vector2.Zero;
         }
 
 
