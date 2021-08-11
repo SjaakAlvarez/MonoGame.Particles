@@ -17,11 +17,11 @@ namespace MonoGame.Particles.Physics
 
         public static void CircleToCircle(Contact m, Body a, Body b)
         {
-            Circle A = (Circle)a.shape;
-            Circle B = (Circle)b.shape;
+            Circle A = (Circle)a.Shape;
+            Circle B = (Circle)b.Shape;
 
             // Calculate translational vector, which is normal
-            Vector2 normal = b.position - a.position;
+            Vector2 normal = b.Position - a.Position;
 
             float dist_sqr = normal.LengthSquared();
             float radius = A.radius + B.radius;
@@ -41,26 +41,26 @@ namespace MonoGame.Particles.Physics
             {
                 m.penetration = A.radius;
                 m.normal = new Vector2(1, 0);
-                m.contacts[0] = a.position;
+                m.contacts[0] = a.Position;
             }
             else
             {
                 m.penetration = radius - distance;
                 m.normal = normal / distance; // Faster than using Normalized since we already performed sqrt
-                m.contacts[0] = m.normal * A.radius + a.position;
+                m.contacts[0] = m.normal * A.radius + a.Position;
             }
         }
 
         public static void CircletoPolygon(Contact m, Body a, Body b)
         {
-            Circle A = (Circle)a.shape;
-            PolygonShape B = (PolygonShape)b.shape;           
+            Circle A = (Circle)a.Shape;
+            PolygonShape B = (PolygonShape)b.Shape;           
 
             m.contact_count = 0;
 
             // Transform circle center to Polygon model space
-            Vector2 center = a.position;
-            center = VectorMath.Mult(Matrix.Transpose(B.u), (center - b.position));
+            Vector2 center = a.Position;
+            center = VectorMath.Mult(VectorMath.Transpose(B.u), (center - b.Position));
 
             // Find edge with minimum penetration
             // Exact concept as using support points in Polygon vs Polygon
@@ -90,7 +90,7 @@ namespace MonoGame.Particles.Physics
             {
                 m.contact_count = 1;
                 m.normal = -VectorMath.Mult(B.u , B.m_normals[faceNormal]);
-                m.contacts[0] = m.normal * A.radius + a.position;
+                m.contacts[0] = m.normal * A.radius + a.Position;
                 m.penetration = A.radius;
                 return;
             }
@@ -111,7 +111,7 @@ namespace MonoGame.Particles.Physics
                 n = VectorMath.Mult(B.u , n);
                 n=VectorMath.Normalize(n);
                 m.normal = n;
-                v1 = VectorMath.Mult(B.u , v1) + b.position;
+                v1 = VectorMath.Mult(B.u , v1) + b.Position;
                 m.contacts[0] = v1;
             }
 
@@ -123,7 +123,7 @@ namespace MonoGame.Particles.Physics
 
                 m.contact_count = 1;
                 Vector2 n = v2 - center;
-                v2 = VectorMath.Mult(B.u, v2)  + b.position;
+                v2 = VectorMath.Mult(B.u, v2)  + b.Position;
                 m.contacts[0] = v2;
                 n = VectorMath.Mult(B.u , n);
                 n=VectorMath.Normalize(n);
@@ -139,7 +139,7 @@ namespace MonoGame.Particles.Physics
 
                 n = VectorMath.Mult(B.u ,n);
                 m.normal = -n;
-                m.contacts[0] = m.normal * A.radius + a.position;
+                m.contacts[0] = m.normal * A.radius + a.Position;
                 m.contact_count = 1;
             }
         }
@@ -162,7 +162,8 @@ namespace MonoGame.Particles.Physics
                 Vector2 nw = VectorMath.Mult( A.u, n);
 
                 // Transform face normal into B's model space
-                Matrix buT = Matrix.Transpose(B.u);
+                //Matrix buT = Matrix.Transpose(B.u);
+                Matrix buT = VectorMath.Transpose(B.u);
                 n = VectorMath.Mult(buT, nw);
 
                 // Retrieve support point from B along -n
@@ -171,8 +172,8 @@ namespace MonoGame.Particles.Physics
                 // Retrieve vertex on face from A, transform into
                 // B's model space
                 Vector2 v = A.m_vertices[i];
-                v = VectorMath.Mult(A.u, v) + A.Body.position;
-                v -= B.Body.position;
+                v = VectorMath.Mult(A.u, v) + A.Body.Position;
+                v -= B.Body.Position;
                 v = VectorMath.Mult(buT , v);
 
                 // Compute penetration distance (in B's model space)
@@ -196,7 +197,7 @@ namespace MonoGame.Particles.Physics
 
             // Calculate normal in incident's frame of reference
             referenceNormal = VectorMath.Mult(RefPoly.u ,referenceNormal); // To world space
-            referenceNormal = VectorMath.Mult(Matrix.Transpose(IncPoly.u), referenceNormal); // To incident's model space
+            referenceNormal = VectorMath.Mult(VectorMath.Transpose(IncPoly.u), referenceNormal); // To incident's model space
 
             // Find most anti-normal face on incident polygon
             int incidentFace = 0;
@@ -212,9 +213,9 @@ namespace MonoGame.Particles.Physics
             }
 
             // Assign face vertices for incidentFace
-            v[0] = VectorMath.Mult(IncPoly.u , IncPoly.m_vertices[incidentFace]) + IncPoly.Body.position;
+            v[0] = VectorMath.Mult(IncPoly.u , IncPoly.m_vertices[incidentFace]) + IncPoly.Body.Position;
             incidentFace = incidentFace + 1 >= IncPoly.m_vertexCount ? 0 : incidentFace + 1;
-            v[1] = VectorMath.Mult(IncPoly.u ,IncPoly.m_vertices[incidentFace]) + IncPoly.Body.position;
+            v[1] = VectorMath.Mult(IncPoly.u ,IncPoly.m_vertices[incidentFace]) + IncPoly.Body.Position;
         }
 
         public static int Clip(Vector2 n, float c, Vector2[] face)
@@ -249,8 +250,8 @@ namespace MonoGame.Particles.Physics
 
         public static void PolygontoPolygon(Contact m, Body a, Body b)
         {
-            PolygonShape A = (PolygonShape)a.shape;
-            PolygonShape B = (PolygonShape)b.shape;
+            PolygonShape A = (PolygonShape)a.Shape;
+            PolygonShape B = (PolygonShape)b.Shape;
             m.contact_count = 0;
 
             // Check for a separating axis with A's face planes
@@ -298,8 +299,8 @@ namespace MonoGame.Particles.Physics
             Vector2 v2 = RefPoly.m_vertices[referenceIndex];
 
             // Transform vertices to world space
-            v1 = VectorMath.Mult(RefPoly.u, v1) + RefPoly.Body.position;
-            v2 = VectorMath.Mult(RefPoly.u,  v2) + RefPoly.Body.position;
+            v1 = VectorMath.Mult(RefPoly.u, v1) + RefPoly.Body.Position;
+            v2 = VectorMath.Mult(RefPoly.u,  v2) + RefPoly.Body.Position;
 
             // Calculate reference face side normal in world space
             Vector2 sidePlaneNormal = (v2 - v1);

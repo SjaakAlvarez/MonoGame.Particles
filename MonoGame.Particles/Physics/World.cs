@@ -1,26 +1,34 @@
 ﻿using Microsoft.Xna.Framework;
+using MonoGame.Extended.Collections;
+using MonoGame.Particles.Particles;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
+using System.Linq;
+using System.Diagnostics;
 
 namespace MonoGame.Particles.Physics
 {
     public class World
-    {        
+    {
         private readonly int m_iterations;
-        public List<Body> bodies=new List<Body>();
-        public List<Contact> contacts = new List<Contact>();        
+        public List<Body> bodies = new List<Body>(100);
+        public List<Contact> contacts = new List<Contact>(100);
+        public List<PhysicsEmitter> emitters = new List<PhysicsEmitter>(10);
         private SpatialHash hash;
 
         public Vector2 WorldSize { get; }
         public int CellSize { get; }
 
         public World(int iterations, Vector2 worldSize, int cellSize)
-        {            
+        {
             this.m_iterations = iterations;
             this.WorldSize = worldSize;
             this.CellSize = cellSize;
-            hash = new SpatialHash((int)worldSize.X, (int)worldSize.Y, cellSize);            
+            hash = new SpatialHash((int)worldSize.X, (int)worldSize.Y, cellSize);
+
         }
 
         private void IntegrateForces(Body b, float dt)
@@ -30,13 +38,13 @@ namespace MonoGame.Particles.Physics
                 return;
             }
 
-            if (b.Force.Length() < 1) b.Force = Vector2.Zero;
-
             float dampening = VectorMath.Clamp(1.0f - dt * b.LinearDamping, 0.0f, 1.0f);
 
-            b.velocity += (b.Force * b.im + (b.IgnoreGravity?Vector2.Zero:VectorMath.gravity)) * (dt / 2.0f);
-            b.velocity *= dampening;
-            b.angularVelocity += b.torque * b.iI * (dt / 2.0f);
+            b.Velocity += (b.Force * b.im + (b.IgnoreGravity ? Vector2.Zero : VectorMath.gravity)) * (dt / 2.0f);            
+            b.Velocity *= dampening;
+            b.AngularVelocity += b.Torque * b.iI * (dt / 2.0f);
+            b.AngularVelocity *= dampening;
+
         }
 
         private void IntegrateVelocity(Body b, float dt)
@@ -44,11 +52,11 @@ namespace MonoGame.Particles.Physics
             if (b.im == 0.0f)
             {
                 return;
-            }            
-
-            b.position += b.velocity * dt;
-            b.orientation += b.angularVelocity * dt;
-            b.SetOrientation(b.orientation);
+            }
+           
+            b.Position += b.Velocity * dt;
+            b.Orientation += b.AngularVelocity * dt;
+            b.SetOrientation(b.Orientation);
             IntegrateForces(b, dt);
         }
 
@@ -70,84 +78,72 @@ namespace MonoGame.Particles.Physics
             hash.removeBody(body);
         }
 
-        public void Step(double deltaTtime)
+        //deltaTime is seconds
+        public void Step(double deltaTime)
         {            
-            foreach(Body b in bodies)
+            //use a copy, because we want to delete emitters in the update           
+            foreach (PhysicsEmitter e in emitters.ToArray()) e.Update(deltaTime); 
+
+            foreach (Body b in bodies)
             {
                 b.calculateAABB();
                 hash.updateBody(b);
             }
-            
+
             contacts.Clear();
+
             
-            for (int i = 0; i < bodies.Count; ++i)
-            {
-                Body A = bodies[i];
+            foreach (Body A in bodies)
+            {                               
                 List<Body> collidingWith = hash.getAllBodiesSharingCellsWithBody(A);
+               
                 foreach (Body B in collidingWith)
                 {
                     if (A.im == 0 && B.im == 0)
-                    {
                         continue;
-                    }
 
                     Contact m = new Contact(A, B);
                     m.Solve();
                     if (m.contact_count > 0)
-                    {                                                
-                        bool handle=A.DoCollision(B, m);
-
-                        if (handle) {
+                    {
+                        ContactAction action = A.DoCollision(B, m);                        
+                        if (action == ContactAction.COLLIDE)
+                        {
                             contacts.Add(m);
                         }
                     }
-                   
+                    
                 }
                 A.FinishCollisions();
-            }
 
-           
+            }
+        
 
             // Integrate forces
-            for (int i = 0; i < bodies.Count; ++i)
-            {
-                IntegrateForces(bodies[i], (float)deltaTtime);
-            }
+            foreach (Body b in bodies) IntegrateForces(b, (float) deltaTime);            
 
             // Initialize collision
-            for (int i = 0; i < contacts.Count; ++i)
-            {
-                contacts[i].Initialize();
-            }
+            foreach (Contact c in contacts) c.Initialize();
 
             // Solve collisions
             for (int j = 0; j < m_iterations; ++j)
             {
-                for (int i = 0; i < contacts.Count; ++i)
-                {
-                    contacts[i].ApplyImpulse();
-                }
+                foreach (Contact c in contacts) c.ApplyImpulse();
             }
 
-            // Integrate velocities
-            for (int i = 0; i < bodies.Count; ++i)
-            {
-                IntegrateVelocity(bodies[i], (float)deltaTtime);
-            }
+            // Integrate velocities           
+            foreach (Body b in bodies) IntegrateVelocity(b, (float) deltaTime);
 
             // Correct positions
-            for (int i = 0; i < contacts.Count; ++i)
-            {
-                contacts[i].PositionalCorrection();
-            }
+            foreach (Contact c in contacts) c.PositionalCorrection();
 
             // Clear all forces
-            for (int i = 0; i < bodies.Count; ++i)
+            foreach (Body b in bodies)
             {
-                Body b = bodies[i];                
-                b.Force=Vector2.Zero;
-                b.torque = 0;
+                b.Force = Vector2.Zero;
+                b.Torque = 0;
             }
-        }
+
+}
     }
 }

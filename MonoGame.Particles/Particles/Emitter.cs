@@ -4,138 +4,123 @@ using MonoGame.Particles.Particles.Modifiers;
 using MonoGame.Particles.Physics;
 using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.Text;
 
 namespace MonoGame.Particles.Particles
 {
-    public class Emitter
+    public class Emitter : BaseEmitter
     {
-        public List<Particle> particles=new List<Particle>();
-        public Vector2 position;
-        private static Random rand = new Random();
-        private World scene;
-        private Interval maxAge;
-        public float ParticlesPerSecond { get; set; }
-        public float LinearDamping { get; set; }
-        private double releaseTime=0;
-        private Shape shape;
-        private Interval speed;
-        public bool started=false;
-        public List<Modifier> Modifiers { get; set; }
-        public Texture2D Texture { get; set; }
-        public bool IgnoreGravity { get; set; }
-        private bool canDestroy;
+        public event ParticleDeathEventHandler ParticleDeath;
+        public delegate void ParticleDeathEventHandler(object sender, ParticleEventArgs e);
 
-        public delegate bool OnCollisionEventHandler(Body sender, Body other, Contact m);
-
-        internal OnCollisionEventHandler onCollisionEventHandler;
-        public event OnCollisionEventHandler OnCollision
+        protected virtual void OnParticleDeath(ParticleEventArgs e)
         {
-            add { onCollisionEventHandler += value; }
-            remove { onCollisionEventHandler -= value; }
+            ParticleDeathEventHandler handler = ParticleDeath;
+            handler?.Invoke(this, e);
         }
 
-        public Emitter(World scene, Shape shape, Vector2 position, Interval speed, float particlesPerSecond, Interval maxAge)
+        public event ParticleBirthEventHandler ParticleBirth;
+        public delegate void ParticleBirthEventHandler(object sender, ParticleEventArgs e);
+
+        protected virtual void OnParticleBirth(ParticleEventArgs e)
         {
-            this.position = position;
-            this.scene = scene;
+            ParticleBirthEventHandler handler = ParticleBirth;
+            handler?.Invoke(this, e);
+        }
+
+        public Emitter(String name, Vector2 position, Interval speed, Interval direction, float particlesPerSecond, Interval maxAge)
+        {
+            this.Name = name;
+            this.Position = position;            
             this.speed = speed;
             this.maxAge = maxAge;
-            this.ParticlesPerSecond = particlesPerSecond;
-            this.shape = shape;
-            Modifiers = new List<Modifier>();
-        }
+            this.direction = direction;
+            this.ParticlesPerSecond = particlesPerSecond;            
+            Modifiers = new List<Modifier>(5);
+            particles = new List<IParticle>(100);            
+        }        
 
-        public void Start()
-        {
-            releaseTime = 0;
-            started = true;
-        }
-
-        public void Stop()
-        {
-            started = false;
-            canDestroy = true;
-        }
-
-        public bool CanDestroy()
-        {
-            return canDestroy && particles.Count == 0;
-        }
-
-        public void Update(double seconds)
+        public override void Update(double seconds)
         {
             if (started)
             {
                 releaseTime += seconds;
 
-                double release = ParticlesPerSecond * releaseTime;
+                double release = ParticlesPerSecond * releaseTime;                
                 if (release > 1)
                 {
                     int r = (int)Math.Floor(release);
                     releaseTime -= (r / ParticlesPerSecond);
 
-                    Interval rotation = new Interval(-Math.PI, Math.PI);
-                    Interval av = new Interval(-0.1f,0.1f);
-
                     for (int i = 0; i < r; i++)
                     {
-                        Particle particle = new Particle((Shape)shape.Clone(), position);
-
-                        Matrix matrix = Matrix.CreateRotationZ((float)(rand.NextDouble() * Math.PI * 2));
-
-                        particle.velocity = new Vector2((float)speed.GetValue(), 0);
-                        particle.velocity = Vector2.Transform(particle.velocity, matrix);                        
-                        particle.SetOrientation((float)rotation.GetValue());
-                        particle.angularVelocity = (float)av.GetValue();
-                        particle.LinearDamping = LinearDamping;
-                        particle.MaxAge = maxAge.GetValue();
-                        particle.IgnoreGravity = IgnoreGravity;
-                        particle.OnCollision += Particle_OnCollision;
-                        scene.AddBody(particle);
-                        particles.Add(particle);
+                        AddParticle();
                     }
                 }
             }
 
-            foreach(Particle p in particles)
+            double milliseconds = seconds * 1000;
+
+            foreach (IParticle p in particles.ToArray())
             {
-                p.Age += seconds*1000;
-                foreach(Modifier m in Modifiers)
+                p.Age += milliseconds;
+
+                if (p.Age > p.MaxAge)
                 {
-                    m.Execute(p);
+                    OnParticleDeath(new ParticleEventArgs(p));
                 }
-            }
+                
+                float dampening = VectorMath.Clamp(1.0f - (float)seconds * LinearDamping, 0.0f, 1.0f);
+
+                p.Position += (p.Velocity * (float)seconds);
+                p.Velocity+= (VectorMath.gravity * (float)seconds);
+                p.Velocity *= dampening;
+
+                foreach (Modifier m in Modifiers)
+                {
+                    m.Execute(this, seconds, p);
+                }
+
+               
+            }            
+
+            particles.RemoveAll(p => p.Age > p.MaxAge);               
             
-            List<Particle> remove = particles.FindAll(p => p.Age > p.MaxAge);
-            particles.RemoveAll(p => p.Age > p.MaxAge);
-            foreach (Particle b in remove) scene.RemoveBody(b);
         }
 
-        private bool Particle_OnCollision(Body sender, Body other, Contact m)
+        public Particle AddParticle()
         {
-            
-            bool keep = true;
-            if (onCollisionEventHandler != null)
-            {
-                keep = onCollisionEventHandler(sender, other, m);
-            }
-            if (!keep)
-            {
-                ((Particle)sender).Age = ((Particle)sender).MaxAge;
-            }
-            //Let the other object determine if it wants to collide
-            return false;
-        }
+            Particle particle = new Particle();
 
-        public void Draw(SpriteBatch spriteBatch)
+            Matrix matrix = Matrix.CreateRotationZ((float)direction.GetValue());
+
+            particle.Velocity = new Vector2((float)speed.GetValue(), 0);
+            particle.Velocity = Vector2.Transform(particle.Velocity, matrix);
+            particle.Position = Position;
+            particle.Orientation=(float)rotation.GetValue();
+            particle.AngularVelocity = (float)av.GetValue();
+           
+            //particle.LinearDamping = LinearDamping;
+            particle.MaxAge = maxAge.GetValue();
+            //particle.IgnoreGravity = IgnoreGravity;
+                        
+            particles.Add(particle);
+
+            OnParticleBirth(new ParticleEventArgs(particle));
+
+            return particle;
+        }
+        
+       
+        public override void Draw(SpriteBatch spriteBatch)
         {
-
-            foreach (Particle p in particles)
+            foreach (IParticle p in particles)
             {
-                //new Rectangle(new Point((int)b.position.X, (int)b.position.Y), new Point(40, 40)), new Rectangle(0, 0, 64, 64), b.Color* b.Alpha, b.orientation, new Vector2(32, 32), SpriteEffects.None, 0);
-                spriteBatch.Draw(Texture,new Vector2(p.position.X, p.position.Y), new Rectangle(0,0,Texture.Width,Texture.Height), p.Color * p.Alpha, p.orientation, new Vector2(Texture.Width,Texture.Height)/2,1.0f, SpriteEffects.None, 0); 
+                spriteBatch.Draw(Texture, new Vector2(p.Position.X, p.Position.Y), new Rectangle(0, 0, Texture.Width, Texture.Height), p.Color * p.Alpha, p.Orientation, new Vector2(Texture.Width, Texture.Height) / 2, 1.0f, SpriteEffects.None, 0);                
             }
         }
+
     }
+
 }
+

@@ -1,4 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
+using MonoGame.Particles.Physics;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -9,8 +10,8 @@ namespace MonoGame.Particles.Particles.Modifiers
     {
         private Color start;
         private Color end;
-        public override void Execute(Particle p)
-        {
+        public override void Execute(BaseEmitter e, double seconds, IParticle p)
+        {           
             p.Color = Color.Lerp(start, end, (float)(p.Age / p.MaxAge));
         }
 

@@ -9,7 +9,7 @@ namespace MonoGame.Particles.Physics
     {
         public const float EPSILON = 0.0001f;
 
-        public const float gravityScale = 0.01f;
+        public const float gravityScale = 20.0f;
         public static Vector2 gravity = new Vector2(0, 10.0f * gravityScale);
 
         public static float Clamp(float a, float low, float high)
@@ -47,6 +47,16 @@ namespace MonoGame.Particles.Physics
         public static Vector2 Mult(Matrix m, Vector2 v)
         {
             return new Vector2(m.M11 * v.X + m.M12 * v.Y, m.M21 * v.X + m.M22 * v.Y);
+        }
+
+        public static Matrix Transpose(Matrix m)
+        {
+            Matrix r =new Matrix();
+            r.M11 = m.M11;
+            r.M12 = m.M21;
+            r.M21 = m.M12;
+            r.M22 = m.M22;
+            return r;
         }
 
         public static Vector2 Normalize(Vector2 v)
