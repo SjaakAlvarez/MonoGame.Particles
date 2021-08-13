@@ -27,7 +27,6 @@ namespace MonoGame.Particles.Samples
        
         private FramesPerSecondCounterComponent framesPerSecondCounter;             
         private readonly ScreenManager screenManager;
-        
 
         public Game1()
         {
@@ -59,7 +58,6 @@ namespace MonoGame.Particles.Samples
             _graphics.IsFullScreen = false;
             _graphics.ApplyChanges();
            
-
             base.Initialize();
         }        
 
@@ -82,6 +80,7 @@ namespace MonoGame.Particles.Samples
             if (state.IsKeyDown(Keys.D2) && screenManager.GetScreens().Length == 0) screenManager.AddScreen(new DemoTwoScreen(), null);
             if (state.IsKeyDown(Keys.D3) && screenManager.GetScreens().Length == 0) screenManager.AddScreen(new DemoThreeScreen(), null);
             if (state.IsKeyDown(Keys.D4) && screenManager.GetScreens().Length == 0) screenManager.AddScreen(new DemoFourScreen(), null);
+            if (state.IsKeyDown(Keys.D5) && screenManager.GetScreens().Length == 0) screenManager.AddScreen(new DemoFiveScreen(), null);
 
             base.Update(gameTime);
         }
@@ -90,14 +89,25 @@ namespace MonoGame.Particles.Samples
         {
             framesPerSecondCounter.Draw(gameTime);
             GraphicsDevice.Clear(Color.Black);
+
+            _spriteBatch.Begin();
+            if (screenManager.GetScreens().Length == 1)
+            {
+                _spriteBatch.DrawString(font, "Press X to return to main screen. Press ESC to exit.", new Vector2(0, 1056), Color.White * 0.8f);
+            }
+            else
+            {
+                _spriteBatch.DrawString(font, "Press 1-5 for demo. Press ESC to exit.", new Vector2(0, 1056), Color.White * 0.8f);
+            }
             
+            _spriteBatch.End();
+
             base.Draw(gameTime);
 
             _spriteBatch.Begin();
-            _spriteBatch.DrawString(font, "FPS:       " + framesPerSecondCounter.FramesPerSecond, new Vector2(0, 16), Color.White * 0.8f);
+            _spriteBatch.DrawString(font, "FPS:              " + framesPerSecondCounter.FramesPerSecond, new Vector2(0, 16), Color.White * 0.8f);
             _spriteBatch.End();
 
-           
         }
     }
 }

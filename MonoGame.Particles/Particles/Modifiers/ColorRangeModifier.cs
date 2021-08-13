@@ -10,7 +10,7 @@ namespace MonoGame.Particles.Particles.Modifiers
     {
         private Color start;
         private Color end;
-        public override void Execute(BaseEmitter e, double seconds, IParticle p)
+        public override void Execute(Emitter e, double seconds, IParticle p)
         {           
             p.Color = Color.Lerp(start, end, (float)(p.Age / p.MaxAge));
         }

@@ -19,13 +19,13 @@ namespace MonoGame.Particles.Physics
         private float df;              // Mixed dynamic friction
         private float sf;              // Mixed static friction
 
-        //TODO fix this
-        const float dt = 1.0f / 60.0f;        
+        private readonly float dt;        
 
-        public Contact(Body a, Body b)
+        public Contact(Body a, Body b, float dt)
         {
             A = a;
             B = b;
+            this.dt = dt;
         }
 
         public void Solve()

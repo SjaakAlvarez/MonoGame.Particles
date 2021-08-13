@@ -12,8 +12,7 @@ namespace MonoGame.Particles.Particles
         public double Age { get; set; }
         public double MaxAge { get; set; }
         public float Alpha { get; set; } = 1.0f;
-        public Color Color { get; set; } = Color.White;
-      
+        public Color Color { get; set; } = Color.White;      
 
         public PhysicsParticle(Shape shape, Vector2 pos):base(shape, pos)
         {

@@ -18,7 +18,7 @@ namespace MonoGame.Particles.Physics
         {
         }
 
-        public virtual void SetOrientation(float r)
+        public virtual void SetOrientation(float radians)
         {
         }
 

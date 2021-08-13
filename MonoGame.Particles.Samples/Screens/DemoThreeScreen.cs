@@ -16,10 +16,8 @@ using System.Collections.Generic;
 
 namespace MonoGame.Particles.Samples.Screens
 {
-    public class DemoThreeScreen : GameScreen
-    {
-        private World world;
-        double steptimer = 16;
+    public class DemoThreeScreen : DemoScreen
+    {                
         const int CELLSIZE = 512;
         private ContentManager Content;
 
@@ -29,18 +27,13 @@ namespace MonoGame.Particles.Samples.Screens
 
         private SpriteBatch _spriteBatch;
         private SpriteFont font;
-        private readonly Tweener tweener = new Tweener();
+        private readonly Tweener tweener = new Tweener();        
 
-        private DrawWorld drawWorld;
-
-        Texture2D blank;
-        Texture2D ball;
-        Texture2D ballshadow;
+        private Texture2D blank;
+        private Texture2D ball;
+        private Texture2D ballshadow;
         private double balltimer;
-
-        public float orientation { get; set; } = 0.3f;
-
-        public ImGUIRenderer GuiRenderer;
+        public float orientation { get; set; } = 0.3f;        
 
         public float ballStaticFriction=0.2f;
         public float ballDynamicFriction=0.2f;
@@ -50,6 +43,9 @@ namespace MonoGame.Particles.Samples.Screens
         public float floorStaticFriction = 0.2f;
         public float floorDynamicFriction = 0.2f;
         public float floorRestitution = 0.3f;
+
+        private ImGuiNET.ImFontPtr uifont;
+
 
         public DemoThreeScreen()
         {
@@ -83,9 +79,7 @@ namespace MonoGame.Particles.Samples.Screens
             balls.Add(body);
         }
 
-        private ImGuiNET.ImFontPtr uifont; 
-        
-
+      
         public override void Activate(bool instancePreserved)
         {
             if (Content == null)
@@ -97,25 +91,19 @@ namespace MonoGame.Particles.Samples.Screens
             ballshadow = Content.Load<Texture2D>("ballshadow");
 
             _spriteBatch = ScreenManager.SpriteBatch;
-
-            Matrix _localProjection = Matrix.CreateOrthographicOffCenter(0f, ScreenManager.GraphicsDevice.Viewport.Width, ScreenManager.GraphicsDevice.Viewport.Height, 0f, 0f, 1f);
-            Matrix _localView = Matrix.Identity;
-
-            drawWorld = new DrawWorld(world, ScreenManager.Game, _localProjection, _localView);
-            drawWorld.DrawAABB = false;
-            drawWorld.DrawShapes = false;
-            drawWorld.DrawInfo = true;
+           
 
             tweener.TweenTo(target: this, p => p.orientation, -0.3f, 5)
                 .Easing(EasingFunctions.QuadraticInOut)
                 .AutoReverse()
                 .RepeatForever();
-
-            GuiRenderer = new ImGUIRenderer(ScreenManager.Game).Initialize().RebuildFontAtlas();
+            
 
             //uifont=ImGuiNET.ImGui.GetIO().Fonts.AddFontFromFileTTF("monogram.ttf",18);
             //GuiRenderer.RebuildFontAtlas();
-            
+            base.Activate(instancePreserved);
+            drawWorld.DrawShapes = false;
+
         }
 
 
@@ -163,6 +151,8 @@ namespace MonoGame.Particles.Samples.Screens
 
         public override void Draw(GameTime gameTime)
         {
+            base.Draw(gameTime);
+
             _spriteBatch.Begin();
 
             drawWorld.DrawSpatialGrid();
@@ -191,7 +181,7 @@ namespace MonoGame.Particles.Samples.Screens
 
             drawWorld.Draw();
 
-            base.Draw(gameTime);
+            
 
             GuiRenderer.BeginLayout(gameTime);
 
@@ -200,12 +190,7 @@ namespace MonoGame.Particles.Samples.Screens
             ImGuiNET.ImGui.Begin("Bounce Demo");
 
             ImGuiNET.ImGui.SliderFloat("Balls/second", ref ballsPerSecond, 0.1f, 10.0f);
-
-            ImGuiNET.ImGui.CollapsingHeader("Debug");
-            ImGuiNET.ImGui.Checkbox("Show shapes", ref drawWorld.DrawShapes);
-            ImGuiNET.ImGui.Checkbox("Show AABB", ref drawWorld.DrawAABB);
-            ImGuiNET.ImGui.Checkbox("Show info", ref drawWorld.DrawInfo);
-
+            
             ImGuiNET.ImGui.CollapsingHeader("Floor");
             ImGuiNET.ImGui.SliderFloat("F Static friction", ref floorStaticFriction, 0, 2);
             ImGuiNET.ImGui.SliderFloat("F Dynamic friction", ref floorDynamicFriction, 0, 2);
@@ -219,12 +204,8 @@ namespace MonoGame.Particles.Samples.Screens
 
             ImGuiNET.ImGui.End();
 
+            DebugWindow();
             //ImGuiNET.ImGui.PopFont();
-
-
-            ImGuiNET.ImGui.ShowDemoWindow();
-            
-
 
             GuiRenderer.EndLayout();
 
