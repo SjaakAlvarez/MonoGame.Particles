@@ -9,17 +9,14 @@ namespace MonoGame.Particles.Particles
     {
         public Vector2 Position { get; set; }
         public Vector2 Velocity { get; set; }
-
         public float Orientation { get; set; }
         public float AngularVelocity { get; set; }
-
         public bool IsParticle { get; set; }
         public double Age { get; set; }
         public double MaxAge { get; set; }
         public float Alpha { get; set; } = 1.0f;
-        public Color Color { get; set; } = Color.White;
+        public Color Color { get; set; } = Color.White;       
 
-       
         public Particle() 
         {
             IsParticle = true;

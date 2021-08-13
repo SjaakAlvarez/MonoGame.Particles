@@ -7,12 +7,12 @@ namespace MonoGame.Particles.Physics
 {
     public class PolygonShape : Shape
     {
-        const int MaxPolyVertexCount = 16;
+        const int MaxPolyVertexCount = 128;
 
         public int m_vertexCount;
         public Vector2[] m_vertices = new Vector2[MaxPolyVertexCount];
         public Vector2[] m_normals = new Vector2[MaxPolyVertexCount];
-        public Vector2 centroid;
+        public Vector2 Centroid { get; set; }
 
         public override void Initialize(float density=1.0f)
         {
@@ -21,7 +21,7 @@ namespace MonoGame.Particles.Physics
 
         public override AABB getAABB(float orient)
         {
-            Matrix m = Matrix.CreateRotationZ(orient);
+            Matrix m = Matrix.CreateRotationZ(-orient);
             float minx = float.MaxValue, miny = float.MaxValue;
             float maxx = float.MinValue, maxy = float.MinValue;
             for(int i=0;i< m_vertexCount; i++)
@@ -68,7 +68,7 @@ namespace MonoGame.Particles.Physics
             }
 
             c *= 1.0f / area;
-            this.centroid = c;
+            this.Centroid = c;
             // Translate vertices to centroid (make the centroid (0, 0)
             // for the polygon in model space)
             // Not really necessary, but I like doing this anyway

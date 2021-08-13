@@ -16,7 +16,8 @@ namespace MonoGame.Particles.Physics
         private readonly int m_iterations;
         public List<Body> bodies = new List<Body>(100);
         public List<Contact> contacts = new List<Contact>(100);
-        public List<PhysicsEmitter> emitters = new List<PhysicsEmitter>(10);
+        public List<PhysicsParticleEmitter> physicsEmitters = new List<PhysicsParticleEmitter>(10);
+        public List<ParticleEmitter> emitters = new List<ParticleEmitter>(10);
         private SpatialHash hash;
 
         public Vector2 WorldSize { get; }
@@ -82,7 +83,8 @@ namespace MonoGame.Particles.Physics
         public void Step(double deltaTime)
         {            
             //use a copy, because we want to delete emitters in the update           
-            foreach (PhysicsEmitter e in emitters.ToArray()) e.Update(deltaTime); 
+            foreach (PhysicsParticleEmitter e in physicsEmitters.ToArray()) e.Update(deltaTime);
+            foreach (ParticleEmitter e in emitters.ToArray()) e.Update(deltaTime);
 
             foreach (Body b in bodies)
             {
@@ -102,7 +104,7 @@ namespace MonoGame.Particles.Physics
                     if (A.im == 0 && B.im == 0)
                         continue;
 
-                    Contact m = new Contact(A, B);
+                    Contact m = new Contact(A, B, (float)deltaTime);
                     m.Solve();
                     if (m.contact_count > 0)
                     {

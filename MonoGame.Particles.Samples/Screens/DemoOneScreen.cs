@@ -6,6 +6,7 @@ using MonoGame.Extended;
 using MonoGame.Extended.Tweening;
 using MonoGame.Particles.Particles;
 using MonoGame.Particles.Particles.Modifiers;
+using MonoGame.Particles.Particles.Origins;
 using MonoGame.Particles.Physics;
 using MonoGame.Particles.Physics.Debug;
 using MonoGame.Particles.Samples.GameStateManagement;
@@ -15,30 +16,26 @@ using System.Text;
 
 namespace MonoGame.Particles.Samples.Screens
 {
-    public class DemoOneScreen : GameScreen
-    {
-        private World world;
-        double steptimer = 16;
+    public class DemoOneScreen : DemoScreen
+    {        
+        private double steptimer = 16;
         const int CELLSIZE = 16;
         private ContentManager Content;
-        Body b1;
-        Body b3;
-        Body b2;
-        Body b4;
-        Body b6;
+        private Body b1;
+        private Body b3;
+        private Body b2;
+        private Body b4;
+        private Body b6;
 
         private SpriteBatch _spriteBatch;
         private SpriteFont font;
         private bool colliding;
-        private readonly Tweener tweener = new Tweener();
+        private readonly Tweener tweener = new Tweener();       
 
-        private DrawWorld drawWorld;
-        
-
-        Texture2D blank;
-        Texture2D fadedcircle;
-        Circle circle = new Circle(8);
-        Circle circle2 = new Circle(4);
+        private Texture2D blank;
+        private Texture2D fadedcircle;
+        private Circle circle = new Circle(8);
+        private Circle circle2 = new Circle(4);
 
         public DemoOneScreen()
         {
@@ -101,12 +98,12 @@ namespace MonoGame.Particles.Samples.Screens
             b4.OnSeparation += B4_OnSeparation;
 
 
-
             PolygonShape box = new PolygonShape();
             box.SetBox(10, 10);
 
-            PhysicsEmitter emitter2 = new PhysicsEmitter("Boxes", world, box, new Vector2(960, 100), new Interval(50, 150), new Interval(-Math.PI, Math.PI), 5.0f, new Interval(4000, 4000));
+            PhysicsParticleEmitter emitter2 = new PhysicsParticleEmitter("Boxes", world, box, new Vector2(960, 100), new Interval(50, 150), new Interval(-Math.PI, Math.PI), 5.0f, new Interval(4000, 4000));
             emitter2.Modifiers.Add(new ColorRangeModifier(Color.LightBlue, Color.Purple));
+            emitter2.Origin = new PointOrigin();
             emitter2.OnCollision += Emitter2_OnCollision;
             emitter2.Start();           
             
@@ -131,13 +128,9 @@ namespace MonoGame.Particles.Samples.Screens
 
             _spriteBatch = ScreenManager.SpriteBatch;
 
-            Matrix _localProjection = Matrix.CreateOrthographicOffCenter(0f, ScreenManager.GraphicsDevice.Viewport.Width, ScreenManager.GraphicsDevice.Viewport.Height, 0f, 0f, 1f);
-            Matrix _localView = Matrix.Identity;
+            base.Activate(instancePreserved);
 
-            drawWorld = new DrawWorld(world, ScreenManager.Game, _localProjection, _localView);
-            drawWorld.DrawAABB = false;
             drawWorld.DrawShapes = false;
-            drawWorld.DrawInfo = true;
         }
 
         public override void HandleInput(GameTime gameTime, InputState input)
@@ -145,8 +138,7 @@ namespace MonoGame.Particles.Samples.Screens
             if (Keyboard.GetState().IsKeyDown(Keys.X))
             {                
                 ScreenManager.RemoveScreen(this);
-            }
-                
+            }                
             base.HandleInput(gameTime, input);
         }
 
@@ -159,8 +151,7 @@ namespace MonoGame.Particles.Samples.Screens
                 steptimer += 16;
             }
 
-            b4.SetOrientation(b4.Orientation + (float)(0.002f * gameTime.ElapsedGameTime.TotalMilliseconds));
-           
+            b4.SetOrientation(b4.Orientation + (float)(0.002f * gameTime.ElapsedGameTime.TotalMilliseconds));           
             tweener.Update(gameTime.GetElapsedSeconds());
            
             base.Update(gameTime, otherScreenHasFocus, coveredByOtherScreen);
@@ -168,21 +159,20 @@ namespace MonoGame.Particles.Samples.Screens
 
         public override void Draw(GameTime gameTime)
         {
+            base.Draw(gameTime);
+
             _spriteBatch.Begin();
 
             drawWorld.DrawSpatialGrid();
-
             
-            foreach (PhysicsEmitter e in world.emitters.FindAll(p => p.Name.Equals("Boxes")))
+            foreach (PhysicsParticleEmitter e in world.physicsEmitters.FindAll(p => p.Name.Equals("Boxes")))
             {
                 foreach (IParticle b in e.particles)
                 {
                     _spriteBatch.Draw(blank, new Rectangle(new Point((int)b.Position.X, (int)b.Position.Y), new Point(20, 20)), new Rectangle(0, 0, 4, 4), b.Color * b.Alpha, b.Orientation, new Vector2(2, 2), SpriteEffects.None, 0);
                 }
             }
-
             
-
             _spriteBatch.Draw(blank, new Rectangle(new Point((int)b1.Position.X, (int)b1.Position.Y), new Point(40, 40)), new Rectangle(0, 0, 4, 4), Color.Green, b1.Orientation, new Vector2(2, 2), SpriteEffects.None, 0);
             _spriteBatch.Draw(blank, new Rectangle(new Point((int)b3.Position.X, (int)b3.Position.Y), new Point(40, 40)), new Rectangle(0, 0, 4, 4), Color.Green, b3.Orientation, new Vector2(2, 2), SpriteEffects.None, 0);
             _spriteBatch.Draw(blank, new Rectangle(new Point((int)b2.Position.X, (int)b2.Position.Y), new Point(40, 40)), new Rectangle(0, 0, 4, 4), Color.Green, b2.Orientation, new Vector2(2, 2), SpriteEffects.None, 0);
@@ -190,62 +180,63 @@ namespace MonoGame.Particles.Samples.Screens
             _spriteBatch.Draw(blank, new Rectangle(new Point((int)b4.Position.X, (int)b4.Position.Y), new Point(40, 40)), new Rectangle(0, 0, 4, 4), colliding ? Color.Red : Color.Green, b4.Orientation, new Vector2(2, 2), SpriteEffects.None, 0);
             _spriteBatch.Draw(blank, new Rectangle(new Point(960, 800), new Point(1000, 20)), new Rectangle(0, 0, 4, 4), Color.Green, 0, new Vector2(2, 2), SpriteEffects.None, 0);
 
-            foreach (PhysicsEmitter e in world.emitters.FindAll(p => p.Name.Equals("Debris")))
+            foreach (PhysicsParticleEmitter e in world.physicsEmitters.FindAll(p => p.Name.Equals("Debris")))
             {
                 foreach (IParticle b in e.particles)
                 {
                     _spriteBatch.Draw(blank, new Rectangle(new Point((int)b.Position.X, (int)b.Position.Y), new Point(8, 8)), new Rectangle(0, 0, 4, 4), b.Color * b.Alpha, b.Orientation, new Vector2(2, 2), SpriteEffects.None, 0);
                 }
             }           
-
             _spriteBatch.End();
 
 
             _spriteBatch.Begin(0, BlendState.Additive);
-
-            foreach (PhysicsEmitter e in world.emitters.FindAll(p => p.Name.StartsWith("Explosion")))
+            foreach (PhysicsParticleEmitter e in world.physicsEmitters.FindAll(p => p.Name.StartsWith("Explosion")))
             {
                 e.Draw(_spriteBatch);
             }            
-
             _spriteBatch.End();
 
             drawWorld.Draw();
-            
-            base.Draw(gameTime);
+
+            GuiRenderer.BeginLayout(gameTime);
+            DebugWindow();
+            GuiRenderer.EndLayout();
+
         }
 
         private void Explode(Vector2 pos2)
         {
-            PhysicsEmitter emitter = new PhysicsEmitter("Explosion", world, circle, Vector2.Zero, new Interval(0, 150), new Interval(-Math.PI, Math.PI), 10, new Interval(500, 1000));
+            PhysicsParticleEmitter emitter = new PhysicsParticleEmitter("Explosion", world, circle, Vector2.Zero, new Interval(0, 150), new Interval(-Math.PI, Math.PI), 10, new Interval(500, 1000));
 
             emitter.Modifiers.Add(new ColorRangeModifier(Color.Orange, Color.Black));
+            emitter.Origin = new PointOrigin();
             emitter.Position = pos2;
             emitter.ParticlesPerSecond = 2000;
             emitter.IgnoreGravity = true;
             emitter.LinearDamping = 0.04f;
             emitter.Texture = fadedcircle;
            
-            PhysicsEmitter emitter3 = new PhysicsEmitter("Debris", world, circle2, new Vector2(1200, 100), new Interval(0, 200), new Interval(-Math.PI, Math.PI), 15.0f, new Interval(1000, 2000));
+            PhysicsParticleEmitter emitter3 = new PhysicsParticleEmitter("Debris", world, circle2, new Vector2(1200, 100), new Interval(0, 200), new Interval(-Math.PI, Math.PI), 15.0f, new Interval(1000, 2000));
             emitter3.Modifiers.Add(new AlphaFadeModifier());
             emitter3.Modifiers.Add(new ColorRangeModifier(Color.LightBlue, Color.Purple));
+            emitter3.Origin = new PointOrigin();
             emitter3.Position = pos2;
             emitter3.ParticlesPerSecond = 1000;
             emitter3.LinearDamping = 0.02f;
             
-
             tweener.TweenTo(target: emitter, expression: p => p.ParticlesPerSecond, toValue: 0, duration: 0.25f)
             .Easing(EasingFunctions.ExponentialOut)
             .OnEnd(p =>
             {
-                PhysicsEmitter physicsEmitter = (PhysicsEmitter)p.Target;
+                PhysicsParticleEmitter physicsEmitter = (PhysicsParticleEmitter)p.Target;
                 physicsEmitter.Stop();
             });
             tweener.TweenTo(target: emitter3, expression: p => p.ParticlesPerSecond, toValue: 0, duration: 0.25f)
             .Easing(EasingFunctions.ExponentialOut)
             .OnEnd(p =>
             {
-                ((PhysicsEmitter)p.Target).Stop();
+                ((PhysicsParticleEmitter)p.Target).Stop();
             });
 
             emitter3.Start();

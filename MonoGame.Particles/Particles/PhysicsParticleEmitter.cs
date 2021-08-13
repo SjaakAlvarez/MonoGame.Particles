@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace MonoGame.Particles.Particles
 {
-    public class PhysicsEmitter :BaseEmitter
+    public class PhysicsParticleEmitter :Emitter
     {                   
         private readonly World world;            
         private readonly Shape shape;
@@ -25,7 +25,7 @@ namespace MonoGame.Particles.Particles
             remove { onCollisionEventHandler -= value; }
         }
 
-        public PhysicsEmitter(String name, World world, Shape shape, Vector2 position, Interval speed, Interval direction, float particlesPerSecond, Interval maxAge)
+        public PhysicsParticleEmitter(String name, World world, Shape shape, Vector2 position, Interval speed, Interval direction, float particlesPerSecond, Interval maxAge)
         {
             this.Name = name;
             this.Position = position;
@@ -37,7 +37,7 @@ namespace MonoGame.Particles.Particles
             this.shape = shape;
             Modifiers = new List<Modifier>(5);
             particles = new List<IParticle>(100);
-            world.emitters.Add(this);
+            world.physicsEmitters.Add(this);
         }
         
         public override void Update(double seconds)
@@ -46,8 +46,7 @@ namespace MonoGame.Particles.Particles
             {
                 releaseTime += seconds;
 
-                double release = ParticlesPerSecond * releaseTime;
-                //if (seconds > 0.012d) release *= 0.5f;
+                double release = ParticlesPerSecond * releaseTime;                
                 if (release > 1)
                 {
                     int r = (int)Math.Floor(release);
@@ -80,16 +79,16 @@ namespace MonoGame.Particles.Particles
                 },
                 () =>
                 {
-                    foreach (PhysicsParticle b in remove) world.RemoveBody(b);
+                    foreach (PhysicsParticle b in remove.OfType<PhysicsParticle>()) world.RemoveBody(b);
                 });
 
 
-            if (CanDestroy()) world.emitters.Remove(this);
+            if (CanDestroy()) world.physicsEmitters.Remove(this);
         }
 
         public PhysicsParticle AddParticle()
         {
-            PhysicsParticle particle = new PhysicsParticle((Shape)shape.Clone(), Position);
+            PhysicsParticle particle = new PhysicsParticle((Shape)shape.Clone(), Position + Origin.GetPosition());
 
             Matrix matrix = Matrix.CreateRotationZ((float)direction.GetValue());
 

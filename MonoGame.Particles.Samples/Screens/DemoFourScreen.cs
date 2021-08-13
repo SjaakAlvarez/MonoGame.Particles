@@ -7,45 +7,30 @@ using MonoGame.Extended.Tweening;
 using MonoGame.ImGui;
 using MonoGame.Particles.Particles;
 using MonoGame.Particles.Particles.Modifiers;
+using MonoGame.Particles.Particles.Origins;
 using MonoGame.Particles.Physics;
 using MonoGame.Particles.Physics.Debug;
 using MonoGame.Particles.Samples.GameStateManagement;
 using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace MonoGame.Particles.Samples.Screens
 {
-    public class DemoFourScreen : GameScreen
-    {
-        private World world;
+    public class DemoFourScreen : DemoScreen
+    {        
         double steptimer = 16;
         const int CELLSIZE = 64;
         private Color WATERCOLOR = Color.DodgerBlue;
         private ContentManager Content;
-        Body b1;
-        
-        public float ballsPerSecond = 1.0f;
-
+        private Body b1;             
         private AlphaTestEffect alphaTest;
-
-        private PhysicsEmitter emitter;
-
+        private PhysicsParticleEmitter emitter;
         private SpriteBatch _spriteBatch;
-        private SpriteFont font;
-        private bool colliding;
-        private readonly Tweener tweener = new Tweener();
-
-        private DrawWorld drawWorld;
-        
-        Texture2D blank;
-        Texture2D fadedcircle;
-        
-        Body floor;
+        private readonly Tweener tweener = new Tweener();             
+        private Texture2D blank;
+        private Texture2D fadedcircle;        
+        private Body floor;
         private RenderTarget2D particlesTarget;
-
-        public float orientation=0f;
-        public ImGUIRenderer GuiRenderer;
+        private float orientation=0f;        
 
         public DemoFourScreen()
         {
@@ -63,23 +48,16 @@ namespace MonoGame.Particles.Samples.Screens
             b1.Restitution=0;
             b1.LinearDamping = 0.1f;
             b1.IgnoreGravity = true;
-            b1.FixedPosition = true;
-            //b1.SetStatic();            
-
+            b1.FixedPosition = true;            
             world.AddBody(b1);
-
-            
-
-
+         
             PolygonShape rect = new PolygonShape();
             rect.SetBox(500, 10);
             floor = new Body(rect, new Vector2(960, 800));
             floor.SetStatic();
             floor.Velocity = Vector2.Zero;
             floor.SetOrientation(0);
-            world.AddBody(floor);
-
-            
+            world.AddBody(floor);            
         }
 
         private ContactAction Emitter_OnCollision(Body sender, Body other, Contact m)
@@ -96,20 +74,20 @@ namespace MonoGame.Particles.Samples.Screens
         private void Splash(Vector2 pos2)
         {
             Circle circle = new Circle(14);
-            PhysicsEmitter emitter2 = new PhysicsEmitter("Water", world, circle, Vector2.Zero, new Interval(50, 250), new Interval(-Math.PI, Math.PI), 5, new Interval(500, 1000));
+            PhysicsParticleEmitter emitter2 = new PhysicsParticleEmitter("Water", world, circle, Vector2.Zero, new Interval(50, 250), new Interval(-Math.PI, Math.PI), 5, new Interval(500, 1000));
             emitter2.Modifiers.Add(new ColorRangeModifier(WATERCOLOR, WATERCOLOR));
+            emitter2.Origin = new PointOrigin();
             emitter2.Position = pos2;
             emitter2.ParticlesPerSecond = 150;
             emitter2.IgnoreGravity = false;
             emitter2.LinearDamping = 0.01f;
             emitter2.Texture = fadedcircle;
            
-
             tweener.TweenTo(target: emitter2, expression: p => p.ParticlesPerSecond, toValue: 0, duration: 0.25f)
             .Easing(EasingFunctions.ExponentialOut)
             .OnEnd(p =>
             {
-                PhysicsEmitter physicsEmitter = (PhysicsEmitter)p.Target;
+                PhysicsParticleEmitter physicsEmitter = (PhysicsParticleEmitter)p.Target;
                 physicsEmitter.Stop();
             });
            
@@ -124,25 +102,17 @@ namespace MonoGame.Particles.Samples.Screens
 
             blank = Content.Load<Texture2D>("blank");
             fadedcircle = Content.Load<Texture2D>("fadedcircle");
-            font = Content.Load<SpriteFont>("Debug");
-
+           
             _spriteBatch = ScreenManager.SpriteBatch;
-
-            Matrix _localProjection = Matrix.CreateOrthographicOffCenter(0f, ScreenManager.GraphicsDevice.Viewport.Width, ScreenManager.GraphicsDevice.Viewport.Height, 0f, 0f, 1f);
-            Matrix _localView = Matrix.Identity;
-
-            drawWorld = new DrawWorld(world, ScreenManager.Game, _localProjection, _localView);
-            drawWorld.DrawAABB = false;
-            drawWorld.DrawShapes = false;
-            drawWorld.DrawInfo = true;
 
             particlesTarget = new RenderTarget2D(ScreenManager.GraphicsDevice, ScreenManager.GraphicsDevice.Viewport.Width, ScreenManager.GraphicsDevice.Viewport.Height);
 
 
             Circle circle = new Circle(14);
 
-            emitter = new PhysicsEmitter("Water", world, circle, new Vector2(960, 100), new Interval(100, 110), new Interval(1.2f,1.8f), 250, new Interval(3000, 5000));
+            emitter = new PhysicsParticleEmitter("Water", world, circle, new Vector2(960, 100), new Interval(100, 110), new Interval(1.2f,1.8f), 250, new Interval(3000, 5000));
             emitter.Modifiers.Add(new ColorRangeModifier(WATERCOLOR, WATERCOLOR));
+            emitter.Origin = new CircleOrigin(20);
             emitter.OnCollision += Emitter_OnCollision;            
             emitter.Texture = fadedcircle;
             emitter.Start();
@@ -152,9 +122,8 @@ namespace MonoGame.Particles.Samples.Screens
             alphaTest.Projection = Matrix.CreateTranslation(-0.5f, -0.5f, 0) *
                     Matrix.CreateOrthographicOffCenter(0, ScreenManager.GraphicsDevice.Viewport.Width, ScreenManager.GraphicsDevice.Viewport.Height, 0, 0, 1);
 
-            //tweener.TweenTo(this, p => p.orientation, 6.28f, 4).Easing(EasingFunctions.Linear).RepeatForever();
-
-            GuiRenderer = new ImGUIRenderer(ScreenManager.Game).Initialize().RebuildFontAtlas();
+            base.Activate(instancePreserved);
+            drawWorld.DrawShapes = false;
 
         }
 
@@ -176,9 +145,6 @@ namespace MonoGame.Particles.Samples.Screens
                 world.Step(0.016d);
                 steptimer += 16;
             }
-
-            //b4.SetOrientation(b4.Orientation + (float)(0.002f * gameTime.ElapsedGameTime.TotalMilliseconds));
-            //b1.SetOrientation(orientation);
            
             tweener.Update(gameTime.GetElapsedSeconds());
            
@@ -187,23 +153,20 @@ namespace MonoGame.Particles.Samples.Screens
 
         public override void Draw(GameTime gameTime)
         {
+            base.Draw(gameTime);
+
             ScreenManager.GraphicsDevice.SetRenderTarget(particlesTarget);
             ScreenManager.GraphicsDevice.Clear(Color.Transparent);
 
             _spriteBatch.Begin(0, BlendState.Additive);
-            foreach (PhysicsEmitter e in world.emitters.FindAll(p => p.Name.Equals("Water")))
+            foreach (PhysicsParticleEmitter e in world.physicsEmitters.FindAll(p => p.Name.Equals("Water")))
             {
-                e.Draw(_spriteBatch);
-                /* foreach (IParticle b in e.particles)
-                 {
-                     _spriteBatch.Draw(blank, new Rectangle(new Point((int)b.Position.X, (int)b.Position.Y), new Point(8, 8)), new Rectangle(0, 0, 4, 4), b.Color * b.Alpha, b.Orientation, new Vector2(2, 2), SpriteEffects.None, 0);
-                 }*/
+                e.Draw(_spriteBatch);                
             }
             _spriteBatch.End();
             ScreenManager.GraphicsDevice.SetRenderTarget(null);
 
             drawWorld.DrawSpatialGrid();
-
            
             _spriteBatch.Begin(0,effect:alphaTest);
             _spriteBatch.Draw(particlesTarget, Vector2.Zero, Color.White);
@@ -217,7 +180,7 @@ namespace MonoGame.Particles.Samples.Screens
 
             drawWorld.Draw();
             
-            base.Draw(gameTime);
+          
 
             GuiRenderer.BeginLayout(gameTime);
 
@@ -225,15 +188,10 @@ namespace MonoGame.Particles.Samples.Screens
 
             ImGuiNET.ImGui.SliderFloat("Particles/second", ref emitter.ParticlesPerSecond, 0.1f, 400.0f);
 
-            ImGuiNET.ImGui.CollapsingHeader("Debug");
-            ImGuiNET.ImGui.Checkbox("Show shapes", ref drawWorld.DrawShapes);
-            ImGuiNET.ImGui.Checkbox("Show AABB", ref drawWorld.DrawAABB);
-            ImGuiNET.ImGui.Checkbox("Show info", ref drawWorld.DrawInfo);
-
-          
-
+            
             ImGuiNET.ImGui.End();
 
+            DebugWindow();
 
             GuiRenderer.EndLayout();
 

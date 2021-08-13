@@ -15,8 +15,6 @@ namespace MonoGame.Particles.Particles
         Vector2 Position { get; set; }
         Vector2 Velocity { get; set; }
         float Orientation { get; set; }
-        float AngularVelocity { get; set; }
-      
-
+        float AngularVelocity { get; set; }        
     }
 }
