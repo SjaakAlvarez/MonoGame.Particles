@@ -9,15 +9,22 @@ world = new World();
 
 star = Content.Load<Texture2D>("star");
 
-//create a particle emitter at position 200px,200px
-//particle speed between 25 and 50 px/sec
-//particle direction angle (rad) between -PI and PI 
-//20 particles per second
-//particle life between 2000 and 3000 ms
-ParticleEmitter emitter = new ParticleEmitter("Stars", world, new Vector2(200, 200), new Interval(25, 50), new Interval(-Math.PI, Math.PI), 20.0f, new Interval(2000, 3000));
+ParticleEmitter emitter = new ParticleEmitter("Stars", world, 
+    new Vector2(200, 200), //create a particle emitter at position 200px,200px
+    new Interval(25, 50), //particle speed between 25 and 50 px/sec
+    new Interval(-Math.PI, Math.PI), //particle direction angle (rad) between -PI and PI 
+    20.0f, //20 particles per second
+    new Interval(2000, 3000)); //particle life between 2000 and 3000 ms
 
 //particles change color over their lifetime
-emitter.AddModifier(new ColorRangeModifier(Color.Transparent, Color.Red, new Color(255, 255, 0), new Color(0, 255, 0), new Color(0, 0, 255), new Color(255, 0, 255), Color.Transparent));
+emitter.AddModifier(new ColorRangeModifier(
+        Color.Transparent, 
+        Color.Red, 
+        new Color(255, 255, 0), 
+        new Color(0, 255, 0), 
+        new Color(0, 0, 255), 
+        new Color(255, 0, 255), 
+        Color.Transparent));
 
 //particles emit from a point
 emitter.Origin = new PointOrigin();
@@ -53,3 +60,6 @@ public override void Draw(GameTime gameTime)
 
     //other stuff
 }
+```
+
+![Example 01](Images/example01.gif)
