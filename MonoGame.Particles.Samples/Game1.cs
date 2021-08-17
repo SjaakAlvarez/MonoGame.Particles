@@ -81,6 +81,7 @@ namespace MonoGame.Particles.Samples
             if (state.IsKeyDown(Keys.D3) && screenManager.GetScreens().Length == 0) screenManager.AddScreen(new DemoThreeScreen(), null);
             if (state.IsKeyDown(Keys.D4) && screenManager.GetScreens().Length == 0) screenManager.AddScreen(new DemoFourScreen(), null);
             if (state.IsKeyDown(Keys.D5) && screenManager.GetScreens().Length == 0) screenManager.AddScreen(new DemoFiveScreen(), null);
+            if (state.IsKeyDown(Keys.D6) && screenManager.GetScreens().Length == 0) screenManager.AddScreen(new DemoSixScreen(), null);
 
             base.Update(gameTime);
         }
@@ -97,7 +98,7 @@ namespace MonoGame.Particles.Samples
             }
             else
             {
-                _spriteBatch.DrawString(font, "Press 1-5 for demo. Press ESC to exit.", new Vector2(0, 1056), Color.White * 0.8f);
+                _spriteBatch.DrawString(font, "Press 1-6 for demo. Press ESC to exit.", new Vector2(0, 1056), Color.White * 0.8f);
             }
             
             _spriteBatch.End();

@@ -8,7 +8,6 @@ using MonoGame.Particles.Particles;
 using MonoGame.Particles.Particles.Modifiers;
 using MonoGame.Particles.Particles.Origins;
 using MonoGame.Particles.Physics;
-using MonoGame.Particles.Physics.Debug;
 using MonoGame.Particles.Samples.GameStateManagement;
 using System;
 
@@ -49,15 +48,13 @@ namespace MonoGame.Particles.Samples.Screens
             _spriteBatch = ScreenManager.SpriteBatch;            
 
             ParticleEmitter em = new ParticleEmitter("Boxes", world, new Vector2(960, 900), new Interval(800, 900), new Interval(-1.2f, -1.9f), 0.5f, new Interval(2500, 2800));
-            em.Modifiers.Add(new ColorRangeModifier(Color.White, Color.Black));
+            em.AddModifier(new ColorRangeModifier(Color.White, Color.Black));
             em.Origin = new PointOrigin();
             em.LinearDamping = 0.5f;            
             em.Texture = blank;
             em.Start();            
             em.ParticleDeath += Em_ParticleDeath;
-            base.Activate(instancePreserved);
-            drawWorld.DrawShapes = false;
-
+            base.Activate(instancePreserved);            
         }
 
         
@@ -119,8 +116,8 @@ namespace MonoGame.Particles.Samples.Screens
 
             Color color = colors[random.Next(colors.Length)];
 
-            emitter.Modifiers.Add(new ColorRangeModifier(color, color));
-            emitter.Modifiers.Add(new AlphaFadeModifier());
+            emitter.AddModifier(new ColorRangeModifier(color, color));
+            emitter.AddModifier(new AlphaFadeModifier());
             emitter.Origin = new PointOrigin();
             emitter.Position = pos2;
             emitter.ParticlesPerSecond = 8000;
@@ -150,8 +147,8 @@ namespace MonoGame.Particles.Samples.Screens
             ParticleEmitter emitter = new ParticleEmitter("Explosion", world, Vector2.Zero, new Interval(100, 250), new Interval(-Math.PI, Math.PI), 10, new Interval(100, 500));
 
             
-            emitter.Modifiers.Add(new ColorRangeModifier(Color.LightBlue, Color.White));
-            emitter.Modifiers.Add(new AlphaFadeModifier());
+            emitter.AddModifier(new ColorRangeModifier(Color.LightBlue, Color.White));
+            emitter.AddModifier(new AlphaFadeModifier());
             emitter.Origin = new PointOrigin();
             emitter.Position = pos2;
             emitter.ParticlesPerSecond = 3000;

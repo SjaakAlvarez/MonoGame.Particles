@@ -5,6 +5,7 @@ using MonoGame.Particles.Physics;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Linq;
 
 namespace MonoGame.Particles.Particles
 {
@@ -40,7 +41,8 @@ namespace MonoGame.Particles.Particles
             this.direction = direction;
             this.ParticlesPerSecond = particlesPerSecond;            
             Modifiers = new List<Modifier>(5);
-            particles = new List<IParticle>(100);
+            BirthModifiers = new List<BirthModifier>();
+            Particles = new List<IParticle>(100);
             world.emitters.Add(this);
         }        
 
@@ -63,9 +65,10 @@ namespace MonoGame.Particles.Particles
                 }
             }
 
+            TotalSeconds += seconds;
             double milliseconds = seconds * 1000;
 
-            foreach (IParticle p in particles.ToArray())
+            foreach (IParticle p in Particles.ToArray())
             {
                 p.Age += milliseconds;
 
@@ -80,6 +83,8 @@ namespace MonoGame.Particles.Particles
                 p.Velocity+= (VectorMath.gravity * (float)seconds);
                 p.Velocity *= dampening;
 
+                p.Orientation += p.AngularVelocity;
+
                 foreach (Modifier m in Modifiers)
                 {
                     m.Execute(this, seconds, p);
@@ -87,7 +92,7 @@ namespace MonoGame.Particles.Particles
                
             }            
 
-            particles.RemoveAll(p => p.Age > p.MaxAge);
+            Particles.RemoveAll(p => p.Age > p.MaxAge);
             if (CanDestroy()) world.emitters.Remove(this);
         }
 
@@ -100,11 +105,18 @@ namespace MonoGame.Particles.Particles
             particle.Velocity = new Vector2((float)speed.GetValue(), 0);
             particle.Velocity = Vector2.Transform(particle.Velocity, matrix);
             particle.Position = Position+Origin.GetPosition();
+            particle.AngularVelocity = (float)av.GetValue();
             particle.Orientation=(float)rotation.GetValue();
             particle.AngularVelocity = (float)av.GetValue();                       
-            particle.MaxAge = maxAge.GetValue();            
+            particle.MaxAge = maxAge.GetValue();
+            particle.Texture = Texture;
                         
-            particles.Add(particle);
+            foreach(BirthModifier m in BirthModifiers)
+            {
+                m.Execute(this, particle);
+            }
+
+            Particles.Add(particle);
 
             OnParticleBirth(new ParticleEventArgs(particle));
 
@@ -114,9 +126,9 @@ namespace MonoGame.Particles.Particles
        
         public override void Draw(SpriteBatch spriteBatch)
         {
-            foreach (IParticle p in particles)
+            foreach (Particle p in Particles.OfType<Particle>())
             {
-                spriteBatch.Draw(Texture, new Vector2(p.Position.X, p.Position.Y), new Rectangle(0, 0, Texture.Width, Texture.Height), p.Color * p.Alpha, p.Orientation, new Vector2(Texture.Width, Texture.Height) / 2, 1.0f, SpriteEffects.None, 0);                
+                spriteBatch.Draw(p.Texture, new Vector2(p.Position.X, p.Position.Y), new Rectangle(0, 0, p.Texture.Width, p.Texture.Height), p.Color * p.Alpha, p.Orientation, new Vector2(p.Texture.Width, p.Texture.Height) / 2,p.Scale, SpriteEffects.None, 0);                
             }
         }
 

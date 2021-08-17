@@ -18,7 +18,7 @@ namespace MonoGame.Particles.Physics
         public List<Contact> contacts = new List<Contact>(100);
         public List<PhysicsParticleEmitter> physicsEmitters = new List<PhysicsParticleEmitter>(10);
         public List<ParticleEmitter> emitters = new List<ParticleEmitter>(10);
-        private SpatialHash hash;
+        private readonly SpatialHash hash;
 
         public Vector2 WorldSize { get; }
         public int CellSize { get; }

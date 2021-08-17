@@ -16,7 +16,7 @@ namespace MonoGame.Particles.Particles
         private readonly World world;            
         private readonly Shape shape;
         
-        public delegate ContactAction OnCollisionEventHandler(Body sender, Body other, Contact m);
+        public delegate ContactAction OnCollisionEventHandler(PhysicsParticle sender, Body other, Contact m);
 
         internal OnCollisionEventHandler onCollisionEventHandler;
         public event OnCollisionEventHandler OnCollision
@@ -36,10 +36,23 @@ namespace MonoGame.Particles.Particles
             this.ParticlesPerSecond = particlesPerSecond;
             this.shape = shape;
             Modifiers = new List<Modifier>(5);
-            particles = new List<IParticle>(100);
+            BirthModifiers = new List<BirthModifier>();
+            Particles = new List<IParticle>(100);
             world.physicsEmitters.Add(this);
         }
-        
+
+        public override void AddBirthModifier(BirthModifier modifier)
+        {
+            if (!modifier.SupportsPhysics) throw new ArgumentException("Modifier does not support physics", modifier.GetType().Name);
+            base.AddBirthModifier(modifier);
+        }
+
+        public override void AddModifier(Modifier modifier)
+        {
+            if (!modifier.SupportsPhysics) throw new ArgumentException("Modifier does not support physics", modifier.GetType().Name);
+            base.AddModifier(modifier);
+        }
+
         public override void Update(double seconds)
         {
             if (started)
@@ -60,8 +73,9 @@ namespace MonoGame.Particles.Particles
             }
 
             double milliseconds = seconds * 1000;
+            TotalSeconds += seconds;
 
-            foreach (IParticle p in particles.ToArray())
+            foreach (IParticle p in Particles.ToArray())
             {
                 p.Age += milliseconds;
                 foreach (Modifier m in Modifiers)
@@ -70,16 +84,16 @@ namespace MonoGame.Particles.Particles
                 }
             }
 
-            List<IParticle> remove = particles.FindAll(p => p.Age > p.MaxAge);
+            List<IParticle> remove = Particles.FindAll(p => p.Age > p.MaxAge);
 
             Parallel.Invoke(
                 () =>
                 {
-                    particles.RemoveAll(p => p.Age > p.MaxAge);
+                    Particles.RemoveAll(p => p.Age > p.MaxAge);
                 },
                 () =>
                 {
-                    foreach (PhysicsParticle b in remove.OfType<PhysicsParticle>()) world.RemoveBody(b);
+                    foreach (PhysicsParticle p in remove.OfType<PhysicsParticle>()) world.RemoveBody(p.Body);
                 });
 
 
@@ -94,18 +108,20 @@ namespace MonoGame.Particles.Particles
 
             particle.Velocity = new Vector2((float)speed.GetValue(), 0);
             particle.Velocity = Vector2.Transform(particle.Velocity, matrix);
-            particle.SetOrientation((float)rotation.GetValue());
+            particle.Orientation=(float)rotation.GetValue();
             particle.AngularVelocity = (float)av.GetValue();
             particle.LinearDamping = LinearDamping;
             particle.MaxAge = maxAge.GetValue();
             particle.IgnoreGravity = IgnoreGravity;
             particle.OnCollision += Particle_OnCollision;
-            world.AddBody(particle);
-            particles.Add(particle);
+            particle.Texture = Texture;
+            foreach (BirthModifier m in BirthModifiers) m.Execute(this, particle);
+            world.AddBody(particle.Body);
+            Particles.Add(particle);
             return particle;
         }
 
-        private ContactAction Particle_OnCollision(Body sender, Body other, Contact m)
+        private ContactAction Particle_OnCollision(PhysicsParticle sender, Body other, Contact m)
         {
             ContactAction action = ContactAction.COLLIDE;
             if (onCollisionEventHandler != null)
@@ -114,7 +130,7 @@ namespace MonoGame.Particles.Particles
             }
             if (action == ContactAction.DESTROY)
             {
-                ((PhysicsParticle)sender).Age = ((PhysicsParticle)sender).MaxAge;
+                (sender).Age = (sender).MaxAge;
                 return ContactAction.IGNORE;
             }
             //Let the other object determine if it wants to collide

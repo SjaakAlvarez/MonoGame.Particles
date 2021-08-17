@@ -60,7 +60,7 @@ namespace MonoGame.Particles.Samples.Screens
             world.AddBody(floor);            
         }
 
-        private ContactAction Emitter_OnCollision(Body sender, Body other, Contact m)
+        private ContactAction Emitter_OnCollision(PhysicsParticle sender, Body other, Contact m)
         {
             if (other == floor)
             {
@@ -75,7 +75,7 @@ namespace MonoGame.Particles.Samples.Screens
         {
             Circle circle = new Circle(14);
             PhysicsParticleEmitter emitter2 = new PhysicsParticleEmitter("Water", world, circle, Vector2.Zero, new Interval(50, 250), new Interval(-Math.PI, Math.PI), 5, new Interval(500, 1000));
-            emitter2.Modifiers.Add(new ColorRangeModifier(WATERCOLOR, WATERCOLOR));
+            emitter2.AddModifier(new ColorRangeModifier(WATERCOLOR, WATERCOLOR));
             emitter2.Origin = new PointOrigin();
             emitter2.Position = pos2;
             emitter2.ParticlesPerSecond = 150;
@@ -111,7 +111,7 @@ namespace MonoGame.Particles.Samples.Screens
             Circle circle = new Circle(14);
 
             emitter = new PhysicsParticleEmitter("Water", world, circle, new Vector2(960, 100), new Interval(100, 110), new Interval(1.2f,1.8f), 250, new Interval(3000, 5000));
-            emitter.Modifiers.Add(new ColorRangeModifier(WATERCOLOR, WATERCOLOR));
+            emitter.AddModifier(new ColorRangeModifier(WATERCOLOR, WATERCOLOR));
             emitter.Origin = new CircleOrigin(20);
             emitter.OnCollision += Emitter_OnCollision;            
             emitter.Texture = fadedcircle;
@@ -122,9 +122,7 @@ namespace MonoGame.Particles.Samples.Screens
             alphaTest.Projection = Matrix.CreateTranslation(-0.5f, -0.5f, 0) *
                     Matrix.CreateOrthographicOffCenter(0, ScreenManager.GraphicsDevice.Viewport.Width, ScreenManager.GraphicsDevice.Viewport.Height, 0, 0, 1);
 
-            base.Activate(instancePreserved);
-            drawWorld.DrawShapes = false;
-
+            base.Activate(instancePreserved);            
         }
 
         public override void HandleInput(GameTime gameTime, InputState input)

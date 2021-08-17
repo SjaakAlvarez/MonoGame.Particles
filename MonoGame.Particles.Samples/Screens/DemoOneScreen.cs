@@ -102,14 +102,14 @@ namespace MonoGame.Particles.Samples.Screens
             box.SetBox(10, 10);
 
             PhysicsParticleEmitter emitter2 = new PhysicsParticleEmitter("Boxes", world, box, new Vector2(960, 100), new Interval(50, 150), new Interval(-Math.PI, Math.PI), 5.0f, new Interval(4000, 4000));
-            emitter2.Modifiers.Add(new ColorRangeModifier(Color.LightBlue, Color.Purple));
+            emitter2.AddModifier(new ColorRangeModifier(Color.LightBlue, Color.Purple));            
             emitter2.Origin = new PointOrigin();
             emitter2.OnCollision += Emitter2_OnCollision;
             emitter2.Start();           
             
         }
 
-        private ContactAction Emitter2_OnCollision(Body sender, Body other, Contact m)
+        private ContactAction Emitter2_OnCollision(PhysicsParticle sender, Body other, Contact m)
         {
             Explode(((PhysicsParticle)sender).Position);
             //delete the particle
@@ -129,8 +129,6 @@ namespace MonoGame.Particles.Samples.Screens
             _spriteBatch = ScreenManager.SpriteBatch;
 
             base.Activate(instancePreserved);
-
-            drawWorld.DrawShapes = false;
         }
 
         public override void HandleInput(GameTime gameTime, InputState input)
@@ -167,7 +165,7 @@ namespace MonoGame.Particles.Samples.Screens
             
             foreach (PhysicsParticleEmitter e in world.physicsEmitters.FindAll(p => p.Name.Equals("Boxes")))
             {
-                foreach (IParticle b in e.particles)
+                foreach (IParticle b in e.Particles)
                 {
                     _spriteBatch.Draw(blank, new Rectangle(new Point((int)b.Position.X, (int)b.Position.Y), new Point(20, 20)), new Rectangle(0, 0, 4, 4), b.Color * b.Alpha, b.Orientation, new Vector2(2, 2), SpriteEffects.None, 0);
                 }
@@ -182,7 +180,7 @@ namespace MonoGame.Particles.Samples.Screens
 
             foreach (PhysicsParticleEmitter e in world.physicsEmitters.FindAll(p => p.Name.Equals("Debris")))
             {
-                foreach (IParticle b in e.particles)
+                foreach (IParticle b in e.Particles)
                 {
                     _spriteBatch.Draw(blank, new Rectangle(new Point((int)b.Position.X, (int)b.Position.Y), new Point(8, 8)), new Rectangle(0, 0, 4, 4), b.Color * b.Alpha, b.Orientation, new Vector2(2, 2), SpriteEffects.None, 0);
                 }
@@ -209,7 +207,7 @@ namespace MonoGame.Particles.Samples.Screens
         {
             PhysicsParticleEmitter emitter = new PhysicsParticleEmitter("Explosion", world, circle, Vector2.Zero, new Interval(0, 150), new Interval(-Math.PI, Math.PI), 10, new Interval(500, 1000));
 
-            emitter.Modifiers.Add(new ColorRangeModifier(Color.Orange, Color.Black));
+            emitter.AddModifier(new ColorRangeModifier(Color.Orange, Color.Black));
             emitter.Origin = new PointOrigin();
             emitter.Position = pos2;
             emitter.ParticlesPerSecond = 2000;
@@ -218,8 +216,8 @@ namespace MonoGame.Particles.Samples.Screens
             emitter.Texture = fadedcircle;
            
             PhysicsParticleEmitter emitter3 = new PhysicsParticleEmitter("Debris", world, circle2, new Vector2(1200, 100), new Interval(0, 200), new Interval(-Math.PI, Math.PI), 15.0f, new Interval(1000, 2000));
-            emitter3.Modifiers.Add(new AlphaFadeModifier());
-            emitter3.Modifiers.Add(new ColorRangeModifier(Color.LightBlue, Color.Purple));
+            emitter3.AddModifier(new AlphaFadeModifier());
+            emitter3.AddModifier(new ColorRangeModifier(Color.LightBlue, Color.Purple));
             emitter3.Origin = new PointOrigin();
             emitter3.Position = pos2;
             emitter3.ParticlesPerSecond = 1000;
