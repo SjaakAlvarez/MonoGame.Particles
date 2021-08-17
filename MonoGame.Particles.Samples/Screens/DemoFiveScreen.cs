@@ -114,6 +114,7 @@ namespace MonoGame.Particles.Samples.Screens
 
             _spriteBatch = ScreenManager.SpriteBatch;
             base.Activate(instancePreserved);
+            ShowShapes();
         }
 
 

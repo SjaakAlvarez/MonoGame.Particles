@@ -1,4 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -15,9 +16,11 @@ namespace MonoGame.Particles.Particles
         public double Age { get; set; }
         public double MaxAge { get; set; }
         public float Alpha { get; set; } = 1.0f;
-        public Color Color { get; set; } = Color.White;       
+        public Color Color { get; set; } = Color.White;
+        public float Scale { get; set; } = 1.0f;
+        public Texture2D Texture { get; set; }
 
-        public Particle() 
+        public Particle()
         {
             IsParticle = true;
         }

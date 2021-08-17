@@ -10,7 +10,7 @@ namespace MonoGame.Particles.Particles
 {
     public class Emitter
     {
-        public List<IParticle> particles;
+        public List<IParticle> Particles { get; set; }
         public Texture2D Texture { get; set; }
         protected bool started = false;
         protected double releaseTime = 0;        
@@ -20,13 +20,25 @@ namespace MonoGame.Particles.Particles
         public float ParticlesPerSecond;
         public float LinearDamping { get; set; }
         protected Interval speed;
-        public List<Modifier> Modifiers { get; set; }
+        protected List<Modifier> Modifiers { get; set; }
+        protected List<BirthModifier> BirthModifiers { get; set; }
         public bool IgnoreGravity { get; set; }
         public Origin Origin { get; set; } = new PointOrigin();
-        
+        public double TotalSeconds { get; set; }
+
         protected Interval direction;
         protected Interval rotation = new Interval(-Math.PI, Math.PI);
         protected Interval av = new Interval(-0.1f, 0.1f);
+
+        public virtual void AddModifier(Modifier modifier)
+        {
+            Modifiers.Add(modifier);
+        }
+
+        public virtual void AddBirthModifier(BirthModifier modifier)
+        {
+            BirthModifiers.Add(modifier);
+        }
 
         public void Start()
         {
@@ -41,16 +53,17 @@ namespace MonoGame.Particles.Particles
 
         public bool CanDestroy()
         {
-            return particles.Count == 0 && !started;
+            return Particles.Count == 0 && !started;
         }
 
-        public virtual void Update(double seconds) { }
+        public virtual void Update(double seconds) {
+        }
 
         public virtual void Draw(SpriteBatch spriteBatch)
         {
-            foreach (IParticle p in particles)
+            foreach (IParticle p in Particles)
             {
-                spriteBatch.Draw(Texture, new Vector2(p.Position.X, p.Position.Y), new Rectangle(0, 0, Texture.Width, Texture.Height), p.Color * p.Alpha, p.Orientation, new Vector2(Texture.Width, Texture.Height) / 2, 1.0f, SpriteEffects.None, 0);
+                spriteBatch.Draw(p.Texture, new Vector2(p.Position.X, p.Position.Y), new Rectangle(0, 0, Texture.Width, Texture.Height), p.Color * p.Alpha, p.Orientation, new Vector2(Texture.Width, Texture.Height) / 2, 1.0f, SpriteEffects.None, 0);
             }
         }
     }

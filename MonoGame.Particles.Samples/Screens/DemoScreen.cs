@@ -19,6 +19,10 @@ namespace MonoGame.Particles.Samples.Screens
         protected Queue<float> fpsQueue = new Queue<float>(100);
         protected double fpsTimer = 1000;
 
+        private bool showInfo;
+        private bool drawAABB;
+        private bool drawShapes;
+
         public DemoScreen()
         {
             for (int i = 0; i < 100; i++) fpsQueue.Enqueue(0);
@@ -31,11 +35,8 @@ namespace MonoGame.Particles.Samples.Screens
             Matrix _localProjection = Matrix.CreateOrthographicOffCenter(0f, ScreenManager.GraphicsDevice.Viewport.Width, ScreenManager.GraphicsDevice.Viewport.Height, 0f, 0f, 1f);
             Matrix _localView = Matrix.Identity;
 
-            drawWorld = new DrawWorld(world, ScreenManager.Game, _localProjection, _localView);
-            drawWorld.DrawAABB = false;
-            drawWorld.DrawShapes = true;
-            drawWorld.ShowInfo = true;
-
+            drawWorld = new DrawWorld(world, ScreenManager.Game, _localProjection, _localView);     
+            
             GuiRenderer = new ImGUIRenderer(ScreenManager.Game).Initialize().RebuildFontAtlas();
 
             framesPerSecondCounter = new FramesPerSecondCounterComponent(ScreenManager.Game);
@@ -54,7 +55,9 @@ namespace MonoGame.Particles.Samples.Screens
                 fpsQueue.Dequeue();
                 fpsTimer += 1000;
             }
-
+            drawWorld.DrawAABB = drawAABB;
+            drawWorld.DrawShapes = drawShapes;
+            drawWorld.ShowInfo = showInfo;
         }
 
         public override void Draw(GameTime gameTime)
@@ -67,13 +70,18 @@ namespace MonoGame.Particles.Samples.Screens
         {
             ImGuiNET.ImGui.Begin("Debug");
             ImGuiNET.ImGui.Text("Enable/disable debug view options here:");
-            ImGuiNET.ImGui.Checkbox("Show shapes", ref drawWorld.DrawShapes);
-            ImGuiNET.ImGui.Checkbox("Show AABB", ref drawWorld.DrawAABB);
-            ImGuiNET.ImGui.Checkbox("Show info", ref drawWorld.ShowInfo);
+            ImGuiNET.ImGui.Checkbox("Show shapes", ref drawShapes);
+            ImGuiNET.ImGui.Checkbox("Show AABB", ref drawAABB);
+            ImGuiNET.ImGui.Checkbox("Show info", ref showInfo);
 
             float[] temp = fpsQueue.ToArray();
             ImGuiNET.ImGui.PlotLines("FPS", ref temp[0], 100, 0, "", 0, 5000, new System.Numerics.Vector2(0, 100));
             ImGuiNET.ImGui.End();
+        }
+
+        public void ShowShapes()
+        {
+            drawShapes = true;
         }
     }
 }

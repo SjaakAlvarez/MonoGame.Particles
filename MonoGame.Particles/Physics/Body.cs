@@ -166,7 +166,6 @@ namespace MonoGame.Particles.Physics
                     {                        
                         onSeparationEventHandler(this, kv.Key);
                     }
-
                 }
             }
 

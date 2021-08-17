@@ -171,7 +171,7 @@ namespace MonoGame.ImGui
 
             GraphicsDevice.DrawIndexedPrimitives(
                 PrimitiveType.TriangleList, vertex_offset, 0,
-                command_list.VtxBuffer.Size, index_offset, (int)((draw_command.ElemCount / 3)));
+                command_list.VtxBuffer.Size, index_offset, (int)(draw_command.ElemCount / 3));
 
 
 #pragma warning restore CS0618

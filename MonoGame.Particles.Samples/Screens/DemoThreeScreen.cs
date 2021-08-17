@@ -44,7 +44,7 @@ namespace MonoGame.Particles.Samples.Screens
         public float floorDynamicFriction = 0.2f;
         public float floorRestitution = 0.3f;
 
-        private ImGuiNET.ImFontPtr uifont;
+        //private ImGuiNET.ImFontPtr uifont;
 
 
         public DemoThreeScreen()
@@ -101,9 +101,7 @@ namespace MonoGame.Particles.Samples.Screens
 
             //uifont=ImGuiNET.ImGui.GetIO().Fonts.AddFontFromFileTTF("monogram.ttf",18);
             //GuiRenderer.RebuildFontAtlas();
-            base.Activate(instancePreserved);
-            drawWorld.DrawShapes = false;
-
+            base.Activate(instancePreserved);            
         }
 
 
