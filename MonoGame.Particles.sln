@@ -7,8 +7,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MonoGame.Particles", "MonoG
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MonoGame.Particles.Samples", "MonoGame.Particles.Samples\MonoGame.Particles.Samples.csproj", "{D7A33A95-314F-4FCF-B9D0-BBE6456FA0D2}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "NewFolder1", "NewFolder1", "{D2D4F228-4BF3-4143-9F00-CBDBA9A54FF7}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
