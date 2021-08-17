@@ -43,7 +43,7 @@ namespace MonoGame.Particles.Samples.Screens
         public DemoSixScreen()
         {
             VectorMath.gravity = new Vector2(0, 0);
-            world = new World(1, new Vector2(1920, 1080), CELLSIZE);
+            world = new World();
 
         }
 

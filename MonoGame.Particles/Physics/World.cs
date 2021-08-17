@@ -32,6 +32,10 @@ namespace MonoGame.Particles.Physics
 
         }
 
+        public World() : this(1,new Vector2(1920,1080),64)
+        {            
+        }
+
         private void IntegrateForces(Body b, float dt)
         {
             if (b.im == 0.0f)
