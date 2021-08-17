@@ -1,6 +1,6 @@
 # MonoGame.Particles
 
-* [Particles](Documentation/Particles.md)
+* [Particles](Documentation/Particles)
 * [Physics Engine](Documentation/Physics)
 
 Physics engine is based on [Impulse Engine](https://github.com/RandyGaul/ImpulseEngine) by Randy Gaul
