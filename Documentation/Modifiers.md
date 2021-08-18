@@ -20,10 +20,10 @@ Modifies the alpha of the particle from 1 to 0 over it's lifetime
 
 Modifies the color of the particle over it's lifetime
 
-## GravityModifier
+## GravityModifier :warning:
 
 Applies gravity to a particle. **Cannot be used on a PhysicsParticleEmitter!**
 
-## ScaleModifier
+## ScaleModifier :warning:
 
 Modifies the scale of the particle over it's lifetime. **Cannot be used on a PhysicsParticleEmitter!**

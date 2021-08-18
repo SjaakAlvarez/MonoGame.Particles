@@ -8,17 +8,17 @@ not modified._
 
 Changes the color of the particle at birth.
 
-## InwardBirthModifier
+## InwardBirthModifier :warning:
 
 Makes the particle move to the center of the origin. Use this on Circle or Rectangle Origins. 
 **Cannot be used on a PhysicsParticleEmitter!**
 
-## OutwardBirthModifier
+## OutwardBirthModifier :warning:
 
 Makes the particle move away from the center of the origin. Use this on Circle or Rectangle Origins. 
 **Cannot be used on a PhysicsParticleEmitter!**
 
-## ScaleBirthModifier
+## ScaleBirthModifier :warning:
 
 Changes the size of the particle at birth. 
 **Cannot be used on a PhysicsParticleEmitter!**
