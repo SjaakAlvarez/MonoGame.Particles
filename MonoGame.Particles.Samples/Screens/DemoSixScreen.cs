@@ -70,7 +70,7 @@ namespace MonoGame.Particles.Samples.Screens
             
 
             ParticleEmitter emitter = new ParticleEmitter("Boxes", world, new Vector2(400, 400), new Interval(25, 50), new Interval(-Math.PI, Math.PI), 20.0f, new Interval(2000, 3000));
-            emitter.AddModifier(new ColorRangeModifier(Color.Transparent, Color.Red, new Color(255, 255, 0), new Color(0, 255, 0), new Color(0, 0, 255), new Color(255, 0, 255), Color.Transparent));
+            emitter.AddModifier(new ColorRangeModifier(Color.Transparent, Color.Red, Color.Yellow, new Color(0, 255, 0), Color.Blue, new Color(255, 0, 255), Color.Transparent));
             emitter.Origin = new PointOrigin();
             emitter.Texture = star;
             emitter.Start();

@@ -7,6 +7,7 @@ VectorMath.gravity = new Vector2(0, 0);
 //create a new world
 world = new World();
 
+//load a texture
 star = Content.Load<Texture2D>("star");
 
 ParticleEmitter emitter = new ParticleEmitter("Stars", world, 
@@ -20,9 +21,9 @@ ParticleEmitter emitter = new ParticleEmitter("Stars", world,
 emitter.AddModifier(new ColorRangeModifier(
         Color.Transparent, 
         Color.Red, 
-        new Color(255, 255, 0), 
+        Color.Yellow, 
         new Color(0, 255, 0), 
-        new Color(0, 0, 255), 
+        Color.Blue, 
         new Color(255, 0, 255), 
         Color.Transparent));
 
