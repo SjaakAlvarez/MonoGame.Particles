@@ -14,16 +14,16 @@ namespace MonoGame.Particles.Physics
     {
         public Vector2 Position { get; set; }
         public Vector2 Velocity { get; set; }
-        public float AngularVelocity { get; set; }        
+        public float AngularVelocity { get; set; }
         public float Orientation { get; set; }
         public bool IgnoreGravity { get; set; }
         public float Torque { get; set; }
         public Vector2 Force { get; set; }
         public float Restitution { get; set; }
         public bool IsParticle { get; set; }
-        public float LinearDamping { get; set; } 
+        public float LinearDamping { get; set; }
         public bool FixedPosition { get; set; }
-        
+
         public Shape Shape { get; }
 
         public float I;  // moment of inertia
@@ -65,7 +65,7 @@ namespace MonoGame.Particles.Physics
             Shape.Body = this;
             Position = pos;
             Velocity = Vector2.Zero;
-            
+
             Orientation = rand.Next(-3, 3);
             StaticFriction = 0.5f;
             DynamicFriction = 0.3f;
@@ -80,11 +80,11 @@ namespace MonoGame.Particles.Physics
 
         public void calculateAABB()
         {
-            if(Shape is Circle c)
+            if (Shape is Circle c)
             {
-                AABB = c.getAABB(Orientation);               
+                AABB = c.getAABB(Orientation);
             }
-            else if(Shape is PolygonShape p)
+            else if (Shape is PolygonShape p)
             {
                 AABB = p.getAABB(Orientation);
             }
@@ -104,8 +104,8 @@ namespace MonoGame.Particles.Physics
         }
 
         public void ApplyImpulse(Vector2 impulse, Vector2 contactVector)
-        {            
-            if(!FixedPosition) Velocity += im * impulse;
+        {
+            if (!FixedPosition) Velocity += im * impulse;
             AngularVelocity += iI * VectorMath.Cross(contactVector, impulse);
         }
 
@@ -124,26 +124,26 @@ namespace MonoGame.Particles.Physics
             if (collidingWith.ContainsKey(other))
             {
                 //already colliding
-                return collidingWith[other];                
+                return collidingWith[other];
             }
             else
             {
                 //new collision, send event
                 ContactAction action = ContactAction.COLLIDE;
-                
+
                 if (other.onCollisionEventHandler != null)
                 {
-                    action=other.onCollisionEventHandler(other, this, m);                    
+                    action = other.onCollisionEventHandler(other, this, m);
                 }
 
                 if (onCollisionEventHandler != null)
-                {                   
+                {
                     action = onCollisionEventHandler(this, other, m);
                 }
                 collidingWith[other] = action;
                 return action;
             }
-            
+
         }
 
         public void FinishCollisions()
@@ -163,7 +163,7 @@ namespace MonoGame.Particles.Physics
                     }
 
                     if (onSeparationEventHandler != null)
-                    {                        
+                    {
                         onSeparationEventHandler(this, kv.Key);
                     }
                 }

@@ -5,7 +5,7 @@ using System.Text;
 
 namespace MonoGame.Particles.Physics
 {
-    #pragma warning disable S101
+#pragma warning disable S101
     public class AABB
     {
         public Vector2 min;

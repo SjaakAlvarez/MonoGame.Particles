@@ -15,13 +15,12 @@ namespace MonoGame.Particles.Particles
         public float Alpha { get; set; } = 1.0f;
         public Color Color { get; set; } = Color.White;
         public Texture2D Texture { get; set; }
-
         public Body Body { get; set; }
         public bool IsParticle { get => Body.IsParticle; set => throw new NotImplementedException(); }
         public Vector2 Position { get => Body.Position; set => Body.Position = value; }
-        public Vector2 Velocity { get => Body.Velocity; set => Body.Velocity=value; }
+        public Vector2 Velocity { get => Body.Velocity; set => Body.Velocity = value; }
         public float Orientation { get => Body.Orientation; set => Body.SetOrientation(value); }
-        public float AngularVelocity { get => Body.AngularVelocity; set => Body.AngularVelocity=value; }
+        public float AngularVelocity { get => Body.AngularVelocity; set => Body.AngularVelocity = value; }
         public float LinearDamping { get => Body.LinearDamping; set => Body.LinearDamping = value; }
         public bool IgnoreGravity { get => Body.IgnoreGravity; set => Body.IgnoreGravity = value; }
 
@@ -46,7 +45,7 @@ namespace MonoGame.Particles.Particles
             ContactAction action = ContactAction.COLLIDE;
             if (onParticleCollisionEventHandler != null)
             {
-                action=onParticleCollisionEventHandler(this, other, m);
+                action = onParticleCollisionEventHandler(this, other, m);
             }
             return action;
         }

@@ -11,7 +11,7 @@ namespace MonoGame.Particles.Particles.Modifiers
         public override bool SupportsPhysics { get => true; }
 
         public override void Execute(Emitter e, double seconds, IParticle p)
-        {            
+        {
             p.Alpha = MathHelper.Lerp(1.0f, 0.0f, (float)(p.Age / p.MaxAge));
         }
     }

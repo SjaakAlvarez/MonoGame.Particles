@@ -26,7 +26,7 @@ namespace MonoGame.Particles.Physics
         /* the number of buckets (i.e. cells) in the spatial grid */
         public int gridLength { get; set; }
         /* the array-list holding the spatial grid buckets */
-        public List<List<Body>> grid { get; set; }        
+        public List<List<Body>> grid { get; set; }
 
         public SpatialHash(int _width, int _height, int _cellSize)
         {
@@ -42,11 +42,11 @@ namespace MonoGame.Particles.Physics
             gridLength = gridWidth * gridHeight;
 
             grid = new List<List<Body>>(gridLength);
-           
+
 
             for (int i = 0; i < gridLength; i++)
             {
-                grid.Add(new List<Body>());                
+                grid.Add(new List<Body>());
             }
 
         }
@@ -65,15 +65,15 @@ namespace MonoGame.Particles.Physics
         {
             updateIndexes(b, aabbToGrid(b.AABB.min, b.AABB.max));
         }
-                
+
         public List<Body> getAllBodiesSharingCellsWithBody(Body body)
         {
             //collidingBodies.Clear();
             List<Body> collidingBodies = new List<Body>();
 
             foreach (int i in body.GridIndex)
-            {                                
-                foreach(Body b in grid[i])
+            {
+                foreach (Body b in grid[i])
                 {
                     if (!b.IsParticle && b != body) collidingBodies.Add(b);
                 }
@@ -110,7 +110,7 @@ namespace MonoGame.Particles.Physics
         }
 
         private int getIndex1D(int _x, int _y)
-        {            
+        {
             return (int)(_x + gridWidth * _y);
         }
 
@@ -119,7 +119,7 @@ namespace MonoGame.Particles.Physics
             foreach (int i in b.GridIndex)
             {
                 removeIndex(b, i);
-            }            
+            }
             b.GridIndex.Clear();
 
             foreach (int i in _ar)
@@ -129,26 +129,26 @@ namespace MonoGame.Particles.Physics
         }
 
         private void addIndex(Body b, int _cellPos)
-        {            
-            grid[_cellPos].Add(b);            
+        {
+            grid[_cellPos].Add(b);
             b.GridIndex.Add(_cellPos);
         }
-        private void removeIndexes(Body b) 
+        private void removeIndexes(Body b)
         {
             foreach (int i in b.GridIndex)
             {
                 removeIndex(b, i);
-            }            
+            }
             b.GridIndex.Clear();
         }
-        private void removeIndex(Body b, int _pos) 
+        private void removeIndex(Body b, int _pos)
         {
             grid[_pos].Remove(b);
         }
 
         private bool isValidGridPos(int num)
         {
-            return num < 0 || num >= gridLength;               
+            return num < 0 || num >= gridLength;
         }
 
         public Vector2 clampToGridVec(float x, float y)
@@ -252,8 +252,8 @@ namespace MonoGame.Particles.Physics
                 arr.Add(getIndex1D(gridPosX, gridPosY));
             }
             return arr;
-        }       
+        }
 
-        
+
     }
 }

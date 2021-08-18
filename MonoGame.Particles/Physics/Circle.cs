@@ -9,13 +9,13 @@ namespace MonoGame.Particles.Physics
     {
 
         public Circle(float r)
-        {           
+        {
             radius = r;
         }
 
-        public override void Initialize(float density=1.0f)
+        public override void Initialize(float density = 1.0f)
         {
-            ComputeMass(density);            
+            ComputeMass(density);
         }
 
         private void ComputeMass(float density)
@@ -33,7 +33,7 @@ namespace MonoGame.Particles.Physics
 
         public override AABB getAABB(float orient)
         {
-            return new AABB(new Vector2(-radius,-radius),new Vector2(radius,radius));
+            return new AABB(new Vector2(-radius, -radius), new Vector2(radius, radius));
         }
 
         public override Object Clone()

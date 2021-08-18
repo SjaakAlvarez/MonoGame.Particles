@@ -14,9 +14,9 @@ namespace MonoGame.Particles.Physics
         public Vector2[] m_normals = new Vector2[MaxPolyVertexCount];
         public Vector2 Centroid { get; set; }
 
-        public override void Initialize(float density=1.0f)
+        public override void Initialize(float density = 1.0f)
         {
-            ComputeMass(density);            
+            ComputeMass(density);
         }
 
         public override AABB getAABB(float orient)
@@ -24,16 +24,16 @@ namespace MonoGame.Particles.Physics
             Matrix m = Matrix.CreateRotationZ(-orient);
             float minx = float.MaxValue, miny = float.MaxValue;
             float maxx = float.MinValue, maxy = float.MinValue;
-            for(int i=0;i< m_vertexCount; i++)
+            for (int i = 0; i < m_vertexCount; i++)
             {
                 Vector2 v = m_vertices[i];
 
-                v=VectorMath.Mult(m, v);
+                v = VectorMath.Mult(m, v);
 
                 if (v.X < minx) minx = v.X;
                 if (v.Y < miny) miny = v.Y;
-                if (v.X >maxx) maxx = v.X;
-                if (v.Y >maxy) maxy = v.Y;
+                if (v.X > maxx) maxx = v.X;
+                if (v.Y > maxy) maxy = v.Y;
             }
 
             return new AABB(new Vector2(minx, miny), new Vector2(maxx, maxy));
@@ -88,7 +88,7 @@ namespace MonoGame.Particles.Physics
             u.M11 = c;
             u.M12 = -s;
             u.M21 = s;
-            u.M22 = c;       
+            u.M22 = c;
         }
 
 
@@ -100,14 +100,14 @@ namespace MonoGame.Particles.Physics
             m_vertices[1] = new Vector2(hw, -hh);
             m_vertices[2] = new Vector2(hw, hh);
             m_vertices[3] = new Vector2(-hw, hh);
-            m_normals[0] = new Vector2(0.0f, -1.0f);           
+            m_normals[0] = new Vector2(0.0f, -1.0f);
             m_normals[1] = new Vector2(1.0f, 0.0f);
             m_normals[2] = new Vector2(0.0f, 1.0f);
             m_normals[3] = new Vector2(-1.0f, 0.0f);
         }
 
         public void Set(Vector2[] vertices, int count)
-        {            
+        {
 
             count = Math.Min(count, MaxPolyVertexCount);
 
@@ -190,7 +190,7 @@ namespace MonoGame.Particles.Physics
 
                 // Calculate normal with 2D cross product between vector and scalar
                 m_normals[i1] = new Vector2(face.Y, -face.X);
-                m_normals[i1]= VectorMath.Normalize(m_normals[i1]);
+                m_normals[i1] = VectorMath.Normalize(m_normals[i1]);
             }
         }
 
@@ -225,5 +225,5 @@ namespace MonoGame.Particles.Physics
         }
     }
 
-    
+
 }

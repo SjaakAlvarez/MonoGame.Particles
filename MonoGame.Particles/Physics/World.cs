@@ -32,8 +32,8 @@ namespace MonoGame.Particles.Physics
 
         }
 
-        public World() : this(1,new Vector2(1920,1080),64)
-        {            
+        public World() : this(1, new Vector2(1920, 1080), 64)
+        {
         }
 
         private void IntegrateForces(Body b, float dt)
@@ -45,7 +45,7 @@ namespace MonoGame.Particles.Physics
 
             float dampening = VectorMath.Clamp(1.0f - dt * b.LinearDamping, 0.0f, 1.0f);
 
-            b.Velocity += (b.Force * b.im + (b.IgnoreGravity ? Vector2.Zero : VectorMath.gravity)) * (dt / 2.0f);            
+            b.Velocity += (b.Force * b.im + (b.IgnoreGravity ? Vector2.Zero : VectorMath.gravity)) * (dt / 2.0f);
             b.Velocity *= dampening;
             b.AngularVelocity += b.Torque * b.iI * (dt / 2.0f);
             b.AngularVelocity *= dampening;
@@ -58,7 +58,7 @@ namespace MonoGame.Particles.Physics
             {
                 return;
             }
-           
+
             b.Position += b.Velocity * dt;
             b.Orientation += b.AngularVelocity * dt;
             b.SetOrientation(b.Orientation);
@@ -85,7 +85,7 @@ namespace MonoGame.Particles.Physics
 
         //deltaTime is seconds
         public void Step(double deltaTime)
-        {            
+        {
             //use a copy, because we want to delete emitters in the update           
             foreach (PhysicsParticleEmitter e in physicsEmitters.ToArray()) e.Update(deltaTime);
             foreach (ParticleEmitter e in emitters.ToArray()) e.Update(deltaTime);
@@ -98,11 +98,11 @@ namespace MonoGame.Particles.Physics
 
             contacts.Clear();
 
-            
+
             foreach (Body A in bodies)
-            {                               
+            {
                 List<Body> collidingWith = hash.getAllBodiesSharingCellsWithBody(A);
-               
+
                 foreach (Body B in collidingWith)
                 {
                     if (A.im == 0 && B.im == 0)
@@ -112,21 +112,21 @@ namespace MonoGame.Particles.Physics
                     m.Solve();
                     if (m.contact_count > 0)
                     {
-                        ContactAction action = A.DoCollision(B, m);                        
+                        ContactAction action = A.DoCollision(B, m);
                         if (action == ContactAction.COLLIDE)
                         {
                             contacts.Add(m);
                         }
                     }
-                    
+
                 }
                 A.FinishCollisions();
 
             }
-        
+
 
             // Integrate forces
-            foreach (Body b in bodies) IntegrateForces(b, (float) deltaTime);            
+            foreach (Body b in bodies) IntegrateForces(b, (float)deltaTime);
 
             // Initialize collision
             foreach (Contact c in contacts) c.Initialize();
@@ -138,7 +138,7 @@ namespace MonoGame.Particles.Physics
             }
 
             // Integrate velocities           
-            foreach (Body b in bodies) IntegrateVelocity(b, (float) deltaTime);
+            foreach (Body b in bodies) IntegrateVelocity(b, (float)deltaTime);
 
             // Correct positions
             foreach (Contact c in contacts) c.PositionalCorrection();
@@ -150,6 +150,6 @@ namespace MonoGame.Particles.Physics
                 b.Torque = 0;
             }
 
-}
+        }
     }
 }

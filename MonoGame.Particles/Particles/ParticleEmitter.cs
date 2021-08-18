@@ -34,17 +34,17 @@ namespace MonoGame.Particles.Particles
         public ParticleEmitter(String name, World world, Vector2 position, Interval speed, Interval direction, float particlesPerSecond, Interval maxAge)
         {
             Name = name;
-            Position = position;            
+            Position = position;
             this.speed = speed;
             this.maxAge = maxAge;
             this.world = world;
             this.direction = direction;
-            ParticlesPerSecond = particlesPerSecond;            
+            ParticlesPerSecond = particlesPerSecond;
             Modifiers = new List<Modifier>();
             BirthModifiers = new List<BirthModifier>();
             Particles = new List<IParticle>(100);
             world.emitters.Add(this);
-        }        
+        }
 
         public override void Update(double seconds)
         {
@@ -52,7 +52,7 @@ namespace MonoGame.Particles.Particles
             {
                 releaseTime += seconds;
 
-                double release = ParticlesPerSecond * releaseTime;                
+                double release = ParticlesPerSecond * releaseTime;
                 if (release > 1)
                 {
                     int r = (int)Math.Floor(release);
@@ -76,11 +76,11 @@ namespace MonoGame.Particles.Particles
                 {
                     OnParticleDeath(new ParticleEventArgs(p));
                 }
-                
+
                 float dampening = VectorMath.Clamp(1.0f - (float)seconds * LinearDamping, 0.0f, 1.0f);
 
                 p.Position += (p.Velocity * (float)seconds);
-                p.Velocity+= (VectorMath.gravity * (float)seconds);
+                p.Velocity += (VectorMath.gravity * (float)seconds);
                 p.Velocity *= dampening;
 
                 p.Orientation += p.AngularVelocity;
@@ -89,8 +89,8 @@ namespace MonoGame.Particles.Particles
                 {
                     m.Execute(this, seconds, p);
                 }
-               
-            }            
+
+            }
 
             Particles.RemoveAll(p => p.Age > p.MaxAge);
             if (CanDestroy()) world.emitters.Remove(this);
@@ -104,32 +104,29 @@ namespace MonoGame.Particles.Particles
 
             particle.Velocity = new Vector2((float)speed.GetValue(), 0);
             particle.Velocity = Vector2.Transform(particle.Velocity, matrix);
-            particle.Position = Position+Origin.GetPosition();
+            particle.Position = Position + Origin.GetPosition();
             particle.AngularVelocity = (float)av.GetValue();
-            particle.Orientation=(float)rotation.GetValue();
-            particle.AngularVelocity = (float)av.GetValue();                       
+            particle.Orientation = (float)rotation.GetValue();
+            particle.AngularVelocity = (float)av.GetValue();
             particle.MaxAge = maxAge.GetValue();
             particle.Texture = Texture;
-                        
-            foreach(BirthModifier m in BirthModifiers) m.Execute(this, particle);            
+
+            foreach (BirthModifier m in BirthModifiers) m.Execute(this, particle);
 
             Particles.Add(particle);
-
             OnParticleBirth(new ParticleEventArgs(particle));
 
             return particle;
         }
-        
-       
+
+
         public override void Draw(SpriteBatch spriteBatch)
         {
             foreach (Particle p in Particles.OfType<Particle>())
             {
-                spriteBatch.Draw(p.Texture, new Vector2(p.Position.X, p.Position.Y), new Rectangle(0, 0, p.Texture.Width, p.Texture.Height), p.Color * p.Alpha, p.Orientation, new Vector2(p.Texture.Width, p.Texture.Height) / 2,p.Scale, SpriteEffects.None, 0);                
+                spriteBatch.Draw(p.Texture, new Vector2(p.Position.X, p.Position.Y), new Rectangle(0, 0, p.Texture.Width, p.Texture.Height), p.Color * p.Alpha, p.Orientation, new Vector2(p.Texture.Width, p.Texture.Height) / 2, p.Scale, SpriteEffects.None, 0);
             }
         }
-
     }
-
 }
 

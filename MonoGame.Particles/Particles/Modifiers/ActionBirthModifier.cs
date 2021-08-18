@@ -17,7 +17,7 @@ namespace MonoGame.Particles.Particles.Modifiers
 
         public override void Execute(Emitter e, IParticle p)
         {
-            _action.Invoke(e,p);
-        }       
+            _action.Invoke(e, p);
+        }
     }
 }

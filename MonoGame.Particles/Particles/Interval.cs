@@ -7,8 +7,8 @@ namespace MonoGame.Particles.Particles
     public class Interval
     {
         private static Random rand=new Random();
-        private double min;
-        private double max;
+        private readonly double min;
+        private readonly double max;
         public Interval(double a, double b)
         {
             min = a;

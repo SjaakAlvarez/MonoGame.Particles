@@ -11,11 +11,11 @@ using System.Threading.Tasks;
 
 namespace MonoGame.Particles.Particles
 {
-    public class PhysicsParticleEmitter :Emitter
-    {                   
-        private readonly World world;            
+    public class PhysicsParticleEmitter : Emitter
+    {
+        private readonly World world;
         private readonly Shape shape;
-        
+
         public delegate ContactAction OnCollisionEventHandler(PhysicsParticle sender, Body other, Contact m);
 
         internal OnCollisionEventHandler onCollisionEventHandler;
@@ -59,7 +59,7 @@ namespace MonoGame.Particles.Particles
             {
                 releaseTime += seconds;
 
-                double release = ParticlesPerSecond * releaseTime;                
+                double release = ParticlesPerSecond * releaseTime;
                 if (release > 1)
                 {
                     int r = (int)Math.Floor(release);
@@ -108,7 +108,7 @@ namespace MonoGame.Particles.Particles
 
             particle.Velocity = new Vector2((float)speed.GetValue(), 0);
             particle.Velocity = Vector2.Transform(particle.Velocity, matrix);
-            particle.Orientation=(float)rotation.GetValue();
+            particle.Orientation = (float)rotation.GetValue();
             particle.AngularVelocity = (float)av.GetValue();
             particle.LinearDamping = LinearDamping;
             particle.MaxAge = maxAge.GetValue();
@@ -137,6 +137,6 @@ namespace MonoGame.Particles.Particles
             return action;
         }
 
-        
+
     }
 }

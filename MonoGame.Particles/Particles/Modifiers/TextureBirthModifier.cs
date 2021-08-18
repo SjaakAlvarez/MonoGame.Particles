@@ -7,7 +7,7 @@ namespace MonoGame.Particles.Particles.Modifiers
 {
     public class TextureBirthModifier : BirthModifier
     {
-        private Texture2D[] _textures;
+        private readonly Texture2D[] _textures;
         private static Random random = new Random();
 
         public override bool SupportsPhysics { get => true; }

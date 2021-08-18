@@ -7,19 +7,19 @@ using System.Threading.Tasks;
 namespace MonoGame.Particles.Physics
 {
     public class Contact
-    {        
+    {
         private readonly Body A;
         private readonly Body B;
 
         public float penetration;     // Depth of penetration from collision
         public Vector2 normal;          // From A to B
-        public Vector2[] contacts=new Vector2[2];     // Points of contact during collision
+        public Vector2[] contacts = new Vector2[2];     // Points of contact during collision
         public int contact_count; // Number of contacts that occured during collision
         private float e;               // Mixed restitution
         private float df;              // Mixed dynamic friction
         private float sf;              // Mixed static friction
 
-        private readonly float dt;        
+        private readonly float dt;
 
         public Contact(Body a, Body b, float dt)
         {
@@ -31,7 +31,7 @@ namespace MonoGame.Particles.Physics
         public void Solve()
         {
             if (!A.IsParticle || !B.IsParticle)
-            {                
+            {
                 if (A.Shape is Circle && B.Shape is Circle)
                 {
                     Collision.CircleToCircle(this, A, B);
@@ -47,15 +47,15 @@ namespace MonoGame.Particles.Physics
                 else if (A.Shape is PolygonShape && B.Shape is PolygonShape)
                 {
                     Collision.PolygontoPolygon(this, A, B);
-                }                
+                }
             }
-        }       
+        }
 
         private bool Equal(float a, float b)
         {
             // <= instead of < for NaN comparison safety
             return Math.Abs(a - b) <= VectorMath.EPSILON;
-        }        
+        }
 
         public void Initialize()
         {
@@ -92,7 +92,7 @@ namespace MonoGame.Particles.Physics
                 return;
             }
 
-            for(int i = 0; i < contact_count; ++i)
+            for (int i = 0; i < contact_count; ++i)
             {
                 // Calculate radii from COM to contact
                 Vector2 ra = contacts[i] - A.Position;
@@ -118,7 +118,7 @@ namespace MonoGame.Particles.Physics
                 j /= invMassSum;
                 j /= (float)contact_count;
 
-            
+
                 // Apply impulse
                 Vector2 impulse = normal * j;
                 A.ApplyImpulse(-impulse, ra);
@@ -157,15 +157,15 @@ namespace MonoGame.Particles.Physics
         {
             const float k_slop = 0.05f; // Penetration allowance
             const float percent = 0.4f; // Penetration percentage to correct
-            Vector2 correction = (Math.Max(penetration - k_slop, 0.0f) / (A.im + B.im)) * normal * percent;            
-            if(!A.FixedPosition) A.Position -= correction * A.im;
-            if(!B.FixedPosition) B.Position += correction * B.im;            
-        }        
+            Vector2 correction = (Math.Max(penetration - k_slop, 0.0f) / (A.im + B.im)) * normal * percent;
+            if (!A.FixedPosition) A.Position -= correction * A.im;
+            if (!B.FixedPosition) B.Position += correction * B.im;
+        }
 
         public void InfiniteMassCorrection()
         {
-            A.Velocity=Vector2.Zero;
-            B.Velocity=Vector2.Zero;
+            A.Velocity = Vector2.Zero;
+            B.Velocity = Vector2.Zero;
         }
 
 

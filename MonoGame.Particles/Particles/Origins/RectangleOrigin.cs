@@ -29,16 +29,18 @@ namespace MonoGame.Particles.Particles.Origins
             {
                 int n = rand.Next(_width + _height);
 
-                if (n < _width) { 
+                if (n < _width)
+                {
 
-                   if(rand.Next(2)==1)
+                    if (rand.Next(2) == 1)
                         return new Vector2((int)x.GetValue(), -_height / 2);
                     else
                         return new Vector2((int)x.GetValue(), _height / 2);
                 }
-                else {
+                else
+                {
                     if (rand.Next(2) == 1)
-                        return new Vector2(-_width/2,(int)y.GetValue());
+                        return new Vector2(-_width / 2, (int)y.GetValue());
                     else
                         return new Vector2(_width / 2, (int)y.GetValue());
                 }

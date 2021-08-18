@@ -11,21 +11,21 @@ namespace MonoGame.Particles.Particles
     public class Emitter
     {
         public List<IParticle> Particles { get; set; }
-        public Texture2D Texture { get; set; }
-        protected bool started = false;
-        protected double releaseTime = 0;        
+        public Texture2D Texture { get; set; }        
         public Vector2 Position { get; set; }
-        public string Name { get; set; }
-        protected Interval maxAge;
+        public string Name { get; set; }        
         public float ParticlesPerSecond;
-        public float LinearDamping { get; set; }
-        protected Interval speed;
-        protected List<Modifier> Modifiers { get; set; }
-        protected List<BirthModifier> BirthModifiers { get; set; }
+        public float LinearDamping { get; set; }        
         public bool IgnoreGravity { get; set; }
         public Origin Origin { get; set; } = new PointOrigin();
         public double TotalSeconds { get; set; }
 
+        protected Interval speed;
+        protected List<Modifier> Modifiers { get; set; }
+        protected List<BirthModifier> BirthModifiers { get; set; }
+        protected Interval maxAge;
+        protected bool started = false;
+        protected double releaseTime = 0;
         protected Interval direction;
         protected Interval rotation = new Interval(-Math.PI, Math.PI);
         protected Interval av = new Interval(-0.1f, 0.1f);
@@ -56,7 +56,8 @@ namespace MonoGame.Particles.Particles
             return Particles.Count == 0 && !started;
         }
 
-        public virtual void Update(double seconds) {
+        public virtual void Update(double seconds)
+        {
         }
 
         public virtual void Draw(SpriteBatch spriteBatch)

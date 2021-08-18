@@ -7,7 +7,7 @@ namespace MonoGame.Particles.Particles
 {
     public class ColorInterval
     {
-        private Color[] _colors;
+        private readonly Color[] _colors;
 
         public ColorInterval(params Color[] colors)
         {

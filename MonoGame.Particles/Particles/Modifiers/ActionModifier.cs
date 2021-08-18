@@ -8,7 +8,7 @@ namespace MonoGame.Particles.Particles.Modifiers
 
     public class ActionModifier : Modifier
     {
-        private ParticleAction _action;
+        private readonly ParticleAction _action;
 
         public ActionModifier(ParticleAction action)
         {

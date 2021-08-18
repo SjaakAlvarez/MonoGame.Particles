@@ -20,12 +20,11 @@ namespace MonoGame.Particles.Particles.Modifiers
         }
 
         public override void Execute(Emitter e, double seconds, IParticle p)
-        {      
-            if(p is Particle particle)
+        {
+            if (p is Particle particle)
             {
-                particle.Scale = MathHelper.Lerp(_start, _end,(float)(p.Age / p.MaxAge));
+                particle.Scale = MathHelper.Lerp(_start, _end, (float)(p.Age / p.MaxAge));
             }
-            
         }
     }
 }

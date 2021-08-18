@@ -25,13 +25,13 @@ namespace MonoGame.Particles.Physics
 
         public static Vector2 Cross(float a, Vector2 v)
         {
-            return new Vector2(-a * v.Y, a * v.X);           
+            return new Vector2(-a * v.Y, a * v.X);
         }
 
         public static Vector2 Cross(Vector2 v, float a)
         {
             return new Vector2(a * v.Y, -a * v.X);
-        }       
+        }
 
         public static float Dot(Vector2 a, Vector2 b)
         {
@@ -51,7 +51,7 @@ namespace MonoGame.Particles.Physics
 
         public static Matrix Transpose(Matrix m)
         {
-            Matrix r =new Matrix();
+            Matrix r = new Matrix();
             r.M11 = m.M11;
             r.M12 = m.M21;
             r.M21 = m.M12;
