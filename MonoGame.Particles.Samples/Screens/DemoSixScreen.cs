@@ -169,8 +169,6 @@ namespace MonoGame.Particles.Samples.Screens
         {
             base.Draw(gameTime);
 
-            //drawWorld.DrawSpatialGrid();
-
             _spriteBatch.Begin();
             foreach (ParticleEmitter e in world.emitters.FindAll(p => p.Name.Equals("Boxes")))
             {

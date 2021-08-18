@@ -33,14 +33,14 @@ namespace MonoGame.Particles.Particles
 
         public ParticleEmitter(String name, World world, Vector2 position, Interval speed, Interval direction, float particlesPerSecond, Interval maxAge)
         {
-            this.Name = name;
-            this.Position = position;            
+            Name = name;
+            Position = position;            
             this.speed = speed;
             this.maxAge = maxAge;
             this.world = world;
             this.direction = direction;
-            this.ParticlesPerSecond = particlesPerSecond;            
-            Modifiers = new List<Modifier>(5);
+            ParticlesPerSecond = particlesPerSecond;            
+            Modifiers = new List<Modifier>();
             BirthModifiers = new List<BirthModifier>();
             Particles = new List<IParticle>(100);
             world.emitters.Add(this);
@@ -111,10 +111,7 @@ namespace MonoGame.Particles.Particles
             particle.MaxAge = maxAge.GetValue();
             particle.Texture = Texture;
                         
-            foreach(BirthModifier m in BirthModifiers)
-            {
-                m.Execute(this, particle);
-            }
+            foreach(BirthModifier m in BirthModifiers) m.Execute(this, particle);            
 
             Particles.Add(particle);
 

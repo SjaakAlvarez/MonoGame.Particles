@@ -35,7 +35,7 @@ namespace MonoGame.Particles.Particles
             this.direction = direction;
             this.ParticlesPerSecond = particlesPerSecond;
             this.shape = shape;
-            Modifiers = new List<Modifier>(5);
+            Modifiers = new List<Modifier>();
             BirthModifiers = new List<BirthModifier>();
             Particles = new List<IParticle>(100);
             world.physicsEmitters.Add(this);

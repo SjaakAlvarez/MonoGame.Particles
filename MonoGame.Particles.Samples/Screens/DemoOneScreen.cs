@@ -111,7 +111,7 @@ namespace MonoGame.Particles.Samples.Screens
 
         private ContactAction Emitter2_OnCollision(PhysicsParticle sender, Body other, Contact m)
         {
-            Explode(((PhysicsParticle)sender).Position);
+            Explode(sender.Position);
             //delete the particle
             return ContactAction.DESTROY;
         }
