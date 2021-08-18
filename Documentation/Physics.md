@@ -18,7 +18,10 @@ Matrix _localProjection = Matrix.CreateOrthographicOffCenter(0f, GraphicsDevice.
 Matrix _localView = Matrix.Identity;
 
 //create a debug view for the physics engine
-drawWorld = new DrawWorld(world, this, _localProjection, _localView);    
+drawWorld = new DrawWorld(world, this, _localProjection, _localView);   
+drawWorld.DrawAABB = true;
+drawWorld.DrawShapes = true;
+drawWorld.ShowInfo = true; 
 ```
 
 ```C#

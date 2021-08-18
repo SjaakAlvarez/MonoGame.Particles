@@ -15,7 +15,7 @@ namespace MonoGame.Particles.Particles.Modifiers
             _action = action;
         }
 
-        public override bool SupportsPhysics { get => false; }
+        public override bool SupportsPhysics { get => true; }
 
         public override void Execute(Emitter e, double seconds, IParticle p)
         {
