@@ -1,6 +1,6 @@
 # MonoGame.Particles
 
-MonoGame.Particles is a particle system for MonoGame. It can be used as a normal particle
+MonoGame.Particles is a 2D particle system for MonoGame. It can be used as a normal particle
 engine but it also supports particles that use a physics system for collisions.
 
 ![Physics and particles](Documentation/Images/example02.gif)
