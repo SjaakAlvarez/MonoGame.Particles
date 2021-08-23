@@ -7,6 +7,8 @@ namespace MonoGame.Particles.Particles.Origins
 {
     public abstract class Origin
     {
-        public abstract Vector2 GetPosition();
+        public abstract OriginData GetPosition(Emitter e);
+
+        public abstract bool UseColorData { get; }
     }
 }

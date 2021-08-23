@@ -14,6 +14,8 @@ namespace MonoGame.Particles.Particles.Origins
         private readonly int _height;
         private static Random rand = new Random();
 
+        public override bool UseColorData => false;
+
         public RectangleOrigin(int width, int height, bool edge = false)
         {
             _edge = edge;
@@ -23,7 +25,7 @@ namespace MonoGame.Particles.Particles.Origins
             y = new Interval(-height / 2, height / 2);
         }
 
-        public override Vector2 GetPosition()
+        public override OriginData GetPosition(Emitter e)
         {
             if (_edge)
             {
@@ -33,21 +35,21 @@ namespace MonoGame.Particles.Particles.Origins
                 {
 
                     if (rand.Next(2) == 1)
-                        return new Vector2((int)x.GetValue(), -_height / 2);
+                        return new OriginData(new Vector2((int)x.GetValue(), -_height / 2));
                     else
-                        return new Vector2((int)x.GetValue(), _height / 2);
+                        return new OriginData(new Vector2((int)x.GetValue(), _height / 2));
                 }
                 else
                 {
                     if (rand.Next(2) == 1)
-                        return new Vector2(-_width / 2, (int)y.GetValue());
+                        return new OriginData(new Vector2(-_width / 2, (int)y.GetValue()));
                     else
-                        return new Vector2(_width / 2, (int)y.GetValue());
+                        return new OriginData(new Vector2(_width / 2, (int)y.GetValue()));
                 }
             }
             else
             {
-                return new Vector2((int)x.GetValue(), (int)y.GetValue());
+                return new OriginData(new Vector2((int)x.GetValue(), (int)y.GetValue()));
             }
         }
     }

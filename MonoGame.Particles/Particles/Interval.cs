@@ -16,7 +16,7 @@ namespace MonoGame.Particles.Particles
         }
 
         public double GetValue()
-        {
+        {            
             return (rand.NextDouble() * (max - min)) + min;
         }
 

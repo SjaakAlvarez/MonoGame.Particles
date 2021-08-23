@@ -10,6 +10,8 @@ namespace MonoGame.Particles.Particles
 {
     public class Emitter
     {
+        public enum EmitterState { INIT, STARTED, STOPPING, STOPPED}
+
         public List<IParticle> Particles { get; set; }
         public Texture2D Texture { get; set; }        
         public Vector2 Position { get; set; }
@@ -24,11 +26,14 @@ namespace MonoGame.Particles.Particles
         protected List<Modifier> Modifiers { get; set; }
         protected List<BirthModifier> BirthModifiers { get; set; }
         protected Interval maxAge;
-        protected bool started = false;
+        protected EmitterState state = EmitterState.INIT;
         protected double releaseTime = 0;
         protected Interval direction;
         protected Interval rotation = new Interval(-Math.PI, Math.PI);
         protected Interval av = new Interval(-0.1f, 0.1f);
+
+        private double _stopTime;
+        private float _stopCount;
 
         public virtual void AddModifier(Modifier modifier)
         {
@@ -43,21 +48,34 @@ namespace MonoGame.Particles.Particles
         public void Start()
         {
             releaseTime = 0;
-            started = true;
+            state = EmitterState.STARTED;
         }
 
         public void Stop()
         {
-            started = false;
+            if (state == EmitterState.STARTED)
+            {
+                state = EmitterState.STOPPING;
+                _stopCount = ParticlesPerSecond;
+            }
         }
 
         public bool CanDestroy()
         {
-            return Particles.Count == 0 && !started;
+            return Particles.Count == 0 && state==EmitterState.STOPPED;
         }
 
         public virtual void Update(double seconds)
         {
+            if (state == EmitterState.STOPPING)
+            {
+                _stopTime += seconds;
+                ParticlesPerSecond = MathHelper.SmoothStep(_stopCount, 0, (float)_stopTime);
+                if (ParticlesPerSecond <= 0)
+                {
+                    state = EmitterState.STOPPED;
+                }
+            }
         }
 
         public virtual void Draw(SpriteBatch spriteBatch)

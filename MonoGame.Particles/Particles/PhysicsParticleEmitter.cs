@@ -1,11 +1,9 @@
 ﻿using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
-using MonoGame.Extended.Collections;
 using MonoGame.Particles.Particles.Modifiers;
+using MonoGame.Particles.Particles.Origins;
 using MonoGame.Particles.Physics;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -55,7 +53,9 @@ namespace MonoGame.Particles.Particles
 
         public override void Update(double seconds)
         {
-            if (started)
+            base.Update(seconds);
+
+            if (state == EmitterState.STARTED || state == EmitterState.STOPPING)
             {
                 releaseTime += seconds;
 
@@ -100,25 +100,30 @@ namespace MonoGame.Particles.Particles
             if (CanDestroy()) world.physicsEmitters.Remove(this);
         }
 
-        public PhysicsParticle AddParticle()
+        public void AddParticle()
         {
-            PhysicsParticle particle = new PhysicsParticle((Shape)shape.Clone(), Position + Origin.GetPosition());
+            OriginData data = Origin.GetPosition(this);
+            if (data != null)
+            {
+                PhysicsParticle particle = new PhysicsParticle((Shape)shape.Clone(), Position + data.Position);
 
-            Matrix matrix = Matrix.CreateRotationZ((float)direction.GetValue());
+                Matrix matrix = Matrix.CreateRotationZ((float)direction.GetValue());
 
-            particle.Velocity = new Vector2((float)speed.GetValue(), 0);
-            particle.Velocity = Vector2.Transform(particle.Velocity, matrix);
-            particle.Orientation = (float)rotation.GetValue();
-            particle.AngularVelocity = (float)av.GetValue();
-            particle.LinearDamping = LinearDamping;
-            particle.MaxAge = maxAge.GetValue();
-            particle.IgnoreGravity = IgnoreGravity;
-            particle.OnCollision += Particle_OnCollision;
-            particle.Texture = Texture;
-            foreach (BirthModifier m in BirthModifiers) m.Execute(this, particle);
-            world.AddBody(particle.Body);
-            Particles.Add(particle);
-            return particle;
+                if (Origin.UseColorData) particle.Color = data.Color;
+
+                particle.Velocity = new Vector2((float)speed.GetValue(), 0);
+                particle.Velocity = Vector2.Transform(particle.Velocity, matrix);
+                particle.Orientation = (float)rotation.GetValue();
+                particle.AngularVelocity = (float)av.GetValue();
+                particle.LinearDamping = LinearDamping;
+                particle.MaxAge = maxAge.GetValue();
+                particle.IgnoreGravity = IgnoreGravity;
+                particle.OnCollision += Particle_OnCollision;
+                particle.Texture = Texture;
+                foreach (BirthModifier m in BirthModifiers) m.Execute(this, particle);
+                world.AddBody(particle.Body);
+                Particles.Add(particle);                
+            }
         }
 
         private ContactAction Particle_OnCollision(PhysicsParticle sender, Body other, Contact m)

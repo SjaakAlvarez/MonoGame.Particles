@@ -20,18 +20,20 @@ namespace MonoGame.Particles.Particles.Origins
             _radius = radius;
         }
 
-        public override Vector2 GetPosition()
+        public override bool UseColorData => false;
+
+        public override OriginData GetPosition(Emitter e)
         {
             Matrix rotation = Matrix.CreateRotationZ((float)angle.GetValue());
             if (_edge)
             {
                 Vector2 p = new Vector2(_radius, 0);
-                return Vector2.Transform(p, rotation);
+                return new OriginData(Vector2.Transform(p, rotation));
             }
             else
             {
                 Vector2 p = new Vector2((int)dist.GetValue(), 0);
-                return Vector2.Transform(p, rotation);
+                return new OriginData(Vector2.Transform(p, rotation));
             }
         }
     }

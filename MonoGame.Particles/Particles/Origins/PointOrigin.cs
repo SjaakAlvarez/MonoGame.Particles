@@ -4,9 +4,11 @@ namespace MonoGame.Particles.Particles.Origins
 {
     public class PointOrigin : Origin
     {
-        public override Vector2 GetPosition()
+        public override bool UseColorData => false;
+
+        public override OriginData GetPosition(Emitter e)
         {
-            return Vector2.Zero;
+            return new OriginData(Vector2.Zero);
         }
     }
 }

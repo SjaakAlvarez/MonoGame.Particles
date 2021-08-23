@@ -67,8 +67,6 @@ namespace MonoGame.Particles.Samples.Screens
             _spriteBatch = ScreenManager.SpriteBatch;
 
 
-            
-
             ParticleEmitter emitter = new ParticleEmitter("Boxes", world, new Vector2(200, 200), new Interval(25, 50), new Interval(-Math.PI, Math.PI), 20.0f, new Interval(2000, 3000));
             emitter.AddModifier(new ColorRangeModifier(Color.Transparent, Color.Red, Color.Yellow, new Color(0, 255, 0), Color.Blue, new Color(255, 0, 255), Color.Transparent));
             emitter.Origin = new PointOrigin();
@@ -121,13 +119,13 @@ namespace MonoGame.Particles.Samples.Screens
             emitter.Start();
 
             emitter = new ParticleEmitter("Stars", world, new Vector2(200, 800), new Interval(100, 150), new Interval(-Math.PI, Math.PI), 50.0f, new Interval(1000, 1500));
-            emitter.AddBirthModifier(new ScaleBirthModifier(new Interval(1,3)));
-            emitter.AddBirthModifier(new TextureBirthModifier(star,circle));
+            emitter.AddBirthModifier(new ScaleBirthModifier(new Interval(1, 3)));
+            emitter.AddBirthModifier(new TextureBirthModifier(star, circle));
             emitter.AddBirthModifier(new ColorBirthModifier(Color.LightBlue));
             emitter.AddModifier(new AlphaFadeModifier());
             emitter.Origin = new PointOrigin();
             emitter.Texture = star;
-            emitter.Start();            
+            emitter.Start();       
 
             emitter = new ParticleEmitter("Stars", world, new Vector2(1200, 800), new Interval(0, 0), new Interval(-Math.PI, Math.PI), 50.0f, new Interval(2000, 6000));                                   
             emitter.AddModifier(new ColorRangeModifier(Color.Transparent,Color.LightBlue, Color.Orange,Color.Transparent));
@@ -138,6 +136,9 @@ namespace MonoGame.Particles.Samples.Screens
             emitter.Origin = new RectangleOrigin(300,200);
             emitter.Texture = pixel;
             emitter.Start();
+
+
+
 
             base.Activate(instancePreserved);
         }
